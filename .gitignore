@@ -1,0 +1,33 @@
+# Node.js 관련
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 빌드/배포 결과물
+dist/
+build/
+
+# 환경 변수
+.env
+
+# 캐시/임시 파일
+.cache/
+.tmp/
+
+# 테스트 커버리지
+coverage/
+
+# OS/에디터 관련
+.DS_Store
+.vscode/
+.idea/
+
+# 서버 관련 ()
+server/logs/
+server/temp/
+
+# public 안에서 특정 폴더 무시 ()
+public/pages/temp/
+public/css/test/
+public/js/old/

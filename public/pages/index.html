@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="StudyMate — 스터디룸 예약 플랫폼">
+  <title>StudyMate</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-container">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">📚</div>
+      <div class="auth-logo-text">StudyMate</div>
+    </div>
+
+    <div class="auth-card">
+      <!-- 탭 -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login"    onclick="switchTab('login')">로그인</button>
+        <button class="auth-tab"        id="tab-register" onclick="switchTab('register')">회원가입</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="auth-form active" id="form-login">
+        <div class="alert-bar" id="login-err"><i class="bi bi-exclamation-circle"></i><span id="login-err-msg"></span></div>
+
+        <div class="field-group">
+          <label class="field-label">아이디</label>
+          <div class="field-input-wrap">
+            <i class="bi bi-person fi-icon"></i>
+            <input id="l-id" type="text" class="field-input" placeholder="아이디 입력" autocomplete="username">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">비밀번호</label>
+          <div class="field-input-wrap">
+            <i class="bi bi-lock fi-icon"></i>
+            <input id="l-pw" type="password" class="field-input" placeholder="비밀번호 입력" autocomplete="current-password">
+          </div>
+        </div>
+
+        <button class="btn-submit" id="login-btn" onclick="doLogin()">
+          <i class="bi bi-arrow-right-circle-fill"></i> 로그인
+        </button>
+
+        <div class="auth-hint">
+          <div class="auth-hint-title">테스트 계정</div>
+          <div class="auth-hint-row">
+            <span class="role-badge admin">Admin</span>
+            <span class="cred">admin / admin123</span>
+          </div>
+          <div class="auth-hint-row">
+            <span class="role-badge user">User</span>
+            <span class="cred">user1 / user123</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="auth-form" id="form-register">
+        <div class="alert-bar" id="reg-err"><i class="bi bi-exclamation-circle"></i><span id="reg-err-msg"></span></div>
+        <div class="alert-bar" id="reg-ok" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:var(--green);">
+          <i class="bi bi-check-circle-fill"></i><span id="reg-ok-msg"></span>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">아이디 <span style="color:var(--red);">*</span></label>
+          <div class="field-input-wrap">
+            <i class="bi bi-person fi-icon"></i>
+            <input id="r-id" type="text" class="field-input" placeholder="영문·숫자·_ (3~20자)" autocomplete="username" oninput="checkId()">
+          </div>
+          <div class="field-hint" id="id-hint"></div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">비밀번호 <span style="color:var(--red);">*</span></label>
+          <div class="field-input-wrap">
+            <i class="bi bi-lock fi-icon"></i>
+            <input id="r-pw" type="password" class="field-input" placeholder="6자 이상" autocomplete="new-password" oninput="checkPw()">
+          </div>
+          <div class="pw-strength" id="pw-str">
+            <div class="pw-seg" id="ps1"></div><div class="pw-seg" id="ps2"></div>
+            <div class="pw-seg" id="ps3"></div><div class="pw-seg" id="ps4"></div>
+          </div>
+          <div class="field-hint" id="pw-hint"></div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">비밀번호 확인 <span style="color:var(--red);">*</span></label>
+          <div class="field-input-wrap">
+            <i class="bi bi-shield-lock fi-icon"></i>
+            <input id="r-pw2" type="password" class="field-input" placeholder="비밀번호 재입력" autocomplete="new-password" oninput="checkPw2()">
+          </div>
+          <div class="field-hint" id="pw2-hint"></div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">소속 팀 <span style="color:var(--txt3);font-weight:400;text-transform:none;">(선택)</span></label>
+          <div class="field-input-wrap">
+            <i class="bi bi-people fi-icon"></i>
+            <input id="r-team" type="text" class="field-input" placeholder="예: 개발팀, 디자인팀" autocomplete="off">
+          </div>
+          <div class="team-presets">
+            <button class="team-chip" onclick="pickTeam('개발팀')">개발팀</button>
+            <button class="team-chip" onclick="pickTeam('디자인팀')">디자인팀</button>
+            <button class="team-chip" onclick="pickTeam('마케팅팀')">마케팅팀</button>
+            <button class="team-chip" onclick="pickTeam('기획팀')">기획팀</button>
+            <button class="team-chip" onclick="pickTeam('영업팀')">영업팀</button>
+            <button class="team-chip" onclick="pickTeam('인사팀')">인사팀</button>
+          </div>
+        </div>
+
+        <button class="btn-submit" id="reg-btn" onclick="doRegister()">
+          <i class="bi bi-person-plus-fill"></i> 회원가입
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script>
+if (auth.loggedIn()) location.href = auth.isAdmin() ? '/pages/admin.html' : '/pages/user.html';
+
+/* ── TAB ─────────────────────────────── */
+function switchTab(t) {
+  ['login','register'].forEach(n => {
+    document.getElementById('form-'+n).classList.toggle('active', n===t);
+    document.getElementById('tab-'+n).classList.toggle('active', n===t);
+  });
+}
+
+/* ── KEYBOARD ────────────────────────── */
+document.getElementById('l-pw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('l-id').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('l-pw').focus(); });
+document.getElementById('r-pw2').addEventListener('keydown', e => { if(e.key==='Enter') doRegister(); });
+
+/* ── VALIDATION ──────────────────────── */
+const ID_RE = /^[a-zA-Z0-9_]{3,20}$/;
+function checkId() {
+  const v = document.getElementById('r-id').value.trim();
+  const el = document.getElementById('id-hint');
+  const inp = document.getElementById('r-id');
+  if (!v) { el.textContent=''; inp.classList.remove('error','success'); return; }
+  if (!ID_RE.test(v)) {
+    el.className='field-hint error'; el.textContent='영문·숫자·_만, 3~20자';
+    inp.classList.add('error'); inp.classList.remove('success');
+  } else {
+    el.className='field-hint success'; el.textContent='✓ 사용 가능한 형식';
+    inp.classList.add('success'); inp.classList.remove('error');
+  }
+}
+function checkPw() {
+  const v = document.getElementById('r-pw').value;
+  let score = 0;
+  if (v.length >= 6) score++;
+  if (v.length >= 10) score++;
+  if (/[A-Z]/.test(v) || /[0-9]/.test(v)) score++;
+  if (/[^a-zA-Z0-9]/.test(v)) score++;
+  const cols = ['','#ef4444','#f59e0b','#3b82f6','#22c55e'];
+  const lbls = ['','취약','보통','강함','매우 강함'];
+  for (let i=1;i<=4;i++) document.getElementById('ps'+i).style.background = i<=score ? cols[score] : 'var(--surface3)';
+  const el = document.getElementById('pw-hint');
+  el.textContent = v ? '보안 강도: ' + lbls[score] : '';
+  el.className = 'field-hint';
+}
+function checkPw2() {
+  const p1=document.getElementById('r-pw').value, p2=document.getElementById('r-pw2').value;
+  const el=document.getElementById('pw2-hint'), inp=document.getElementById('r-pw2');
+  if (!p2) { el.textContent=''; inp.classList.remove('error','success'); return; }
+  if (p1===p2) {
+    el.className='field-hint success'; el.textContent='✓ 일치';
+    inp.classList.add('success'); inp.classList.remove('error');
+  } else {
+    el.className='field-hint error'; el.textContent='✗ 불일치';
+    inp.classList.add('error'); inp.classList.remove('success');
+  }
+}
+function pickTeam(name) {
+  document.getElementById('r-team').value = name;
+  document.querySelectorAll('.team-chip').forEach(c => c.classList.toggle('active', c.textContent===name));
+}
+document.getElementById('r-team').addEventListener('input', () =>
+  document.querySelectorAll('.team-chip').forEach(c => c.classList.remove('active'))
+);
+
+/* ── LOGIN ───────────────────────────── */
+async function doLogin() {
+  const btn=document.getElementById('login-btn');
+  const errBar=document.getElementById('login-err');
+  errBar.classList.remove('error');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span> 로그인 중...';
+  try {
+    const d = await api.login({
+      username: document.getElementById('l-id').value.trim(),
+      password: document.getElementById('l-pw').value
+    });
+    auth.save(d.token, d.role, d.username, d.team);
+    btn.innerHTML='<i class="bi bi-check-circle-fill"></i> 완료!';
+    setTimeout(() => location.href = d.role==='admin' ? '/pages/admin.html' : '/pages/user.html', 400);
+  } catch(e) {
+    document.getElementById('login-err-msg').textContent = e.message;
+    errBar.classList.add('error');
+    btn.disabled=false; btn.innerHTML='<i class="bi bi-arrow-right-circle-fill"></i> 로그인';
+  }
+}
+
+/* ── REGISTER ────────────────────────── */
+async function doRegister() {
+  const btn=document.getElementById('reg-btn');
+  document.getElementById('reg-err').classList.remove('error');
+  document.getElementById('reg-ok').style.display='none';
+  const username=document.getElementById('r-id').value.trim();
+  const password=document.getElementById('r-pw').value;
+  const pw2=document.getElementById('r-pw2').value;
+  const team=document.getElementById('r-team').value.trim();
+  if (!username||!password) return showRegErr('아이디와 비밀번호를 입력해주세요.');
+  if (!ID_RE.test(username)) return showRegErr('아이디 형식이 올바르지 않습니다.');
+  if (password.length<6) return showRegErr('비밀번호는 6자 이상이어야 합니다.');
+  if (password!==pw2) return showRegErr('비밀번호가 일치하지 않습니다.');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span> 가입 중...';
+  try {
+    const d = await api.register({ username, password, team });
+    auth.save(d.token, d.role, d.username, d.team);
+    document.getElementById('reg-ok-msg').textContent=`${username}님, 환영합니다! 🎉`;
+    document.getElementById('reg-ok').style.display='flex';
+    btn.innerHTML='<i class="bi bi-check-circle-fill"></i> 가입 완료!';
+    setTimeout(() => location.href='/pages/user.html', 800);
+  } catch(e) {
+    showRegErr(e.message);
+    btn.disabled=false; btn.innerHTML='<i class="bi bi-person-plus-fill"></i> 회원가입';
+  }
+}
+function showRegErr(msg) {
+  document.getElementById('reg-err-msg').textContent=msg;
+  document.getElementById('reg-err').classList.add('error');
+}
+</script>
+</body>
+</html>

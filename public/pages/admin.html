@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyMate — 관리자</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <style>
+    .flatpickr-calendar { background:var(--surface)!important; border:1px solid var(--border2)!important; border-radius:var(--r-lg)!important; box-shadow:var(--shadow-xl)!important; font-family:var(--font)!important; }
+    .flatpickr-day { color:var(--txt2)!important; border-radius:var(--r-sm)!important; }
+    .flatpickr-day:hover,.flatpickr-day:focus { background:var(--surface2)!important; border-color:transparent!important; }
+    .flatpickr-day.selected { background:var(--brand)!important; border-color:var(--brand)!important; color:#fff!important; }
+    .flatpickr-day.today:not(.selected) { border-color:var(--brand)!important; color:var(--brand)!important; font-weight:700!important; }
+    .flatpickr-day.flatpickr-disabled { color:var(--txt3)!important; opacity:.35!important; }
+    .flatpickr-months,.flatpickr-weekdays { background:var(--surface)!important; }
+    .flatpickr-current-month,.flatpickr-monthDropdown-months { color:var(--txt)!important; font-size:13px!important; }
+    .flatpickr-weekday { color:var(--txt3)!important; font-size:11px!important; font-weight:700!important; }
+    .flatpickr-prev-month,.flatpickr-next-month { color:var(--txt3)!important; fill:var(--txt3)!important; }
+    .flatpickr-prev-month:hover,.flatpickr-next-month:hover { color:var(--txt)!important; fill:var(--txt)!important; }
+    .dayContainer { border-right:none!important; }
+    .flatpickr-innerContainer { border-bottom:none!important; }
+  </style>
+  <style>
+    .cong-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)}
+    .cong-row:last-child{border-bottom:none}
+    .cong-time{font-family:var(--mono);font-size:11.5px;color:var(--txt3);width:44px;flex-shrink:0}
+    .cong-bw{flex:1;height:6px;background:var(--surface2);border-radius:99px;overflow:hidden}
+    .cong-bf{height:100%;border-radius:99px;transition:width .8s var(--ease-out)}
+    .cong-lbl{font-size:11px;font-weight:700;width:80px;text-align:right;font-family:var(--mono)}
+    .room-stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 18px 14px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s;cursor:default}
+    .room-stat-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+    .room-stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--rc)}
+    .room-stat-val{font-size:26px;font-weight:900;letter-spacing:-1px;color:var(--txt);margin-bottom:2px}
+    .room-stat-lbl{font-size:12px;color:var(--txt2);font-weight:500}
+    .room-stat-bar{margin-top:10px;height:4px;background:var(--surface2);border-radius:99px;overflow:hidden}
+    .room-stat-fill{height:100%;border-radius:99px;transition:width .8s var(--ease-out)}
+    .notif-type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+    /* User table */
+    .user-row-actions{display:flex;gap:5px;align-items:center}
+    /* Room edit card */
+    .room-edit-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;transition:border-color .2s}
+    .room-edit-card:hover{border-color:var(--border2)}
+    .room-active-toggle{display:flex;align-items:center;gap:8px}
+    .toggle-sw{position:relative;width:36px;height:20px;cursor:pointer}
+    .toggle-sw input{opacity:0;width:0;height:0;position:absolute}
+    .toggle-track{position:absolute;inset:0;border-radius:99px;background:var(--surface3);transition:background .2s;border:1px solid var(--border)}
+    .toggle-sw input:checked ~ .toggle-track{background:var(--green);border-color:var(--green)}
+    .toggle-thumb{position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+    .toggle-sw input:checked ~ .toggle-track ~ .toggle-thumb, .toggle-sw input:checked + .toggle-track + .toggle-thumb{transform:translateX(16px)}
+    /* inline toggle thumb positioning */
+    .toggle-sw input:checked ~ *:last-child{transform:translateX(16px)}
+    @keyframes popIn{from{opacity:0;transform:scale(.92) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .date-input-wrap { position:relative; display:inline-flex; align-items:center; }
+    .date-input-wrap .f-control { padding-right:32px!important; }
+    .date-input-wrap .cal-icon { position:absolute; right:10px; color:var(--txt3); font-size:13px; pointer-events:none; }
+    .modal-overlay{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s ease}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-2xl);width:480px;max-width:100%;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-xl);animation:popIn .22s var(--ease-spring)}
+    .modal-head{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1}
+    /* Heatmap */
+    .heatmap-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;padding:16px 20px 20px}
+    .hm-cell{aspect-ratio:1;border-radius:var(--r-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:default;transition:transform .15s;gap:2px}
+    .hm-cell:hover{transform:scale(1.1)}
+    .hm-time{font-size:8.5px;opacity:.7;font-family:var(--mono)}
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sb">
+    <div class="sb-brand">
+      <div class="sb-brand-icon">📚</div>
+      <span class="sb-brand-name">StudyMate</span>
+      <button class="sb-toggle" onclick="toggleSb()"><i class="bi bi-layout-sidebar-reverse"></i></button>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-section">대시보드</div>
+      <button class="sb-item active" data-tip="개요" onclick="goPage('overview',this)">
+        <i class="bi bi-squares-fill"></i><span class="sb-label">개요</span>
+      </button>
+      <button class="sb-item" data-tip="예약 관리" onclick="goPage('reservations',this)">
+        <i class="bi bi-calendar3-week"></i><span class="sb-label">예약 관리</span>
+        <span class="sb-badge" id="badge-total">—</span>
+      </button>
+      <div class="sb-section" style="margin-top:6px;">분석</div>
+      <button class="sb-item" data-tip="시간대 분석" onclick="goPage('analytics',this)">
+        <i class="bi bi-graph-up-arrow"></i><span class="sb-label">시간대 분석</span>
+      </button>
+      <button class="sb-item" data-tip="룸 현황" onclick="goPage('rooms-stats',this)">
+        <i class="bi bi-bar-chart-fill"></i><span class="sb-label">룸 현황</span>
+      </button>
+      <div class="sb-section" style="margin-top:6px;">운영</div>
+      <button class="sb-item" data-tip="유저 관리" onclick="goPage('users',this)">
+        <i class="bi bi-people-fill"></i><span class="sb-label">유저 관리</span>
+        <span class="sb-badge" id="badge-users">—</span>
+      </button>
+      <button class="sb-item" data-tip="룸 관리" onclick="goPage('rooms-mgmt',this)">
+        <i class="bi bi-door-open-fill"></i><span class="sb-label">룸 관리</span>
+      </button>
+      <button class="sb-item" data-tip="알림 관리" onclick="goPage('notifications',this)">
+        <i class="bi bi-bell-fill"></i><span class="sb-label">알림 관리</span>
+      </button>
+      <button class="sb-item" data-tip="자료 현황" onclick="goPage('storage',this)">
+        <i class="bi bi-hdd-fill"></i><span class="sb-label">자료 현황</span>
+      </button>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="sb-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444);">A</div>
+        <div class="sb-user-info">
+          <div class="sb-username" id="sb-uname">—</div>
+          <div class="sb-role">관리자</div>
+        </div>
+      </div>
+      <button class="sb-logout" onclick="auth.logout()">
+        <i class="bi bi-box-arrow-left"></i><span class="sb-label">로그아웃</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div id="toast-stack" class="toast-stack"></div>
+
+    <!-- ═══ OVERVIEW ═══ -->
+    <div class="page active" id="page-overview">
+      <div class="topbar">
+        <div class="topbar-left"><span style="color:var(--txt3);font-size:13px;">StudyMate</span><span class="topbar-sep">›</span><span class="page-title">대시보드 개요</span></div>
+        <div class="topbar-right">
+          <span id="topbar-date" style="font-size:12px;color:var(--txt3);"></span>
+          <div class="live-chip"><div class="live-dot"></div>운영 중</div>
+          <button class="btn-icon" onclick="loadAll()" title="새로고침"><i class="bi bi-arrow-clockwise"></i></button>
+        </div>
+      </div>
+      <div class="page-body">
+        <div class="kpi-grid stagger" style="margin-bottom:14px;">
+          <div class="kpi-card" style="--kpi-line:var(--brand-g);--kpi-bg:rgba(59,130,246,.1);">
+            <div class="kpi-icon-wrap">📋</div><div class="kpi-value" id="kpi-total">—</div>
+            <div class="kpi-label">총 예약 건수</div><div class="spark-row" id="spark-total"></div>
+          </div>
+          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#22c55e,#4ade80);--kpi-bg:rgba(34,197,94,.1);">
+            <div class="kpi-icon-wrap" style="background:rgba(34,197,94,.1);">👥</div><div class="kpi-value" id="kpi-headcount">—</div>
+            <div class="kpi-label">총 이용 인원</div><div class="spark-row" id="spark-head"></div>
+          </div>
+          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#f59e0b,#fcd34d);--kpi-bg:rgba(245,158,11,.1);">
+            <div class="kpi-icon-wrap" style="background:rgba(245,158,11,.1);">📊</div><div class="kpi-value" id="kpi-avg">—</div>
+            <div class="kpi-label">평균 이용 인원</div><div class="spark-row" id="spark-avg"></div>
+          </div>
+          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#ef4444,#fca5a5);--kpi-bg:rgba(239,68,68,.1);">
+            <div class="kpi-icon-wrap" style="background:rgba(239,68,68,.1);">🔥</div><div class="kpi-value" id="kpi-peak" style="font-size:20px;">—</div>
+            <div class="kpi-label">피크 시간대</div><div class="spark-row" id="spark-peak"></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;" class="stagger">
+          <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:10px;">
+            <div style="width:34px;height:34px;border-radius:var(--r);background:rgba(239,68,68,.1);display:grid;place-items:center;font-size:16px;flex-shrink:0;">🚫</div>
+            <div><div style="font-size:20px;font-weight:900;color:var(--red);" id="kpi-cancelled">—</div><div style="font-size:11.5px;color:var(--txt2);">취소 건수</div></div>
+          </div>
+          <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:10px;">
+            <div style="width:34px;height:34px;border-radius:var(--r);background:rgba(34,197,94,.1);display:grid;place-items:center;font-size:16px;flex-shrink:0;">📅</div>
+            <div><div style="font-size:20px;font-weight:900;color:var(--green);" id="kpi-today">—</div><div style="font-size:11.5px;color:var(--txt2);">오늘 예약</div></div>
+          </div>
+          <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:10px;">
+            <div style="width:34px;height:34px;border-radius:var(--r);background:rgba(99,102,241,.1);display:grid;place-items:center;font-size:16px;flex-shrink:0;">🏆</div>
+            <div><div style="font-size:15px;font-weight:800;color:var(--indigo);" id="kpi-top-room">—</div><div style="font-size:11.5px;color:var(--txt2);">인기 룸</div></div>
+          </div>
+          <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:10px;">
+            <div style="width:34px;height:34px;border-radius:var(--r);background:rgba(56,189,248,.1);display:grid;place-items:center;font-size:16px;flex-shrink:0;">👤</div>
+            <div><div style="font-size:20px;font-weight:900;color:#38bdf8;" id="kpi-users">—</div><div style="font-size:11.5px;color:var(--txt2);">총 사용자</div></div>
+          </div>
+        </div>
+        <div class="chart-row c84">
+          <div class="card"><div class="card-head"><div><div class="card-title">시간대별 이용 현황</div><div class="card-sub">시간별 총 예약 인원</div></div><span class="card-tag">Bar</span></div>
+            <div style="padding:16px 20px 20px;"><div style="position:relative;height:200px;"><canvas id="c-hour"></canvas></div></div></div>
+          <div class="card"><div class="card-head"><div><div class="card-title">룸별 비율</div></div></div>
+            <div style="padding:8px 20px 20px;"><div style="position:relative;height:170px;"><canvas id="c-donut"></canvas></div></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+          <div class="card"><div class="card-head"><div><div class="card-title">14일 트렌드</div></div><span class="card-tag">Line</span></div>
+            <div style="padding:12px 20px 20px;"><div style="position:relative;height:130px;"><canvas id="c-trend"></canvas></div></div></div>
+          <div class="card"><div class="card-head"><div><div class="card-title">팀별 예약 현황</div></div></div>
+            <div id="team-stat-list" style="padding:4px 0 8px;"></div></div>
+        </div>
+        <div class="card"><div class="card-head" style="padding-bottom:14px;">
+            <div><div class="card-title">최근 예약</div><div class="card-sub">확정 예약 최신 8건</div></div>
+            <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px;" onclick="goPageByName('reservations')">전체 보기 <i class="bi bi-arrow-right"></i></button>
+          </div>
+          <div class="tbl-wrap"><table class="data-table"><thead><tr><th>#</th><th>예약자</th><th>룸</th><th>날짜</th><th>시간</th><th>인원</th><th>목적</th><th>상태</th></tr></thead><tbody id="recent-tbody"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ RESERVATIONS ═══ -->
+    <div class="page" id="page-reservations">
+      <div class="topbar">
+        <div class="topbar-left"><span style="color:var(--txt3);font-size:13px;">StudyMate</span><span class="topbar-sep">›</span><span class="page-title">예약 관리</span></div>
+        <div class="topbar-right">
+          <div class="search-wrap"><i class="bi bi-search"></i><input class="search-input" id="res-search" placeholder="예약자, 룸, 목적 검색..." oninput="filterRes()"></div>
+          <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px;" onclick="downloadCSV()"><i class="bi bi-download"></i> CSV</button>
+          <button class="btn-icon" onclick="loadAll()"><i class="bi bi-arrow-clockwise"></i></button>
+        </div>
+      </div>
+      <div class="page-body">
+        <div class="card" style="padding:14px 18px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;">상태</div>
+            <div style="display:flex;gap:5px;">
+              <button class="filter-chip active" onclick="setFilter('status','all',this)">전체</button>
+              <button class="filter-chip" onclick="setFilter('status','confirmed',this)">확정</button>
+              <button class="filter-chip" onclick="setFilter('status','cancelled',this)">취소됨</button>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;">룸</div>
+            <div style="display:flex;gap:5px;">
+              <button class="filter-chip active" onclick="setFilter('room','all',this)">전체</button>
+              <button class="filter-chip" onclick="setFilter('room','Room A',this)">A</button>
+              <button class="filter-chip" onclick="setFilter('room','Room B',this)">B</button>
+              <button class="filter-chip" onclick="setFilter('room','Room C',this)">C</button>
+              <button class="filter-chip" onclick="setFilter('room','Room D',this)">D</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-end;">
+            <div><div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;">날짜 시작</div>
+              <div class="date-input-wrap"><input type="text" id="filter-from" class="f-control" placeholder="시작일" readonly style="width:130px;cursor:pointer;"><i class="bi bi-calendar3 cal-icon"></i></div></div>
+            <div><div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;">날짜 끝</div>
+              <div class="date-input-wrap"><input type="text" id="filter-to" class="f-control" placeholder="종료일" readonly style="width:130px;cursor:pointer;"><i class="bi bi-calendar3 cal-icon"></i></div></div>
+            <button class="btn btn-ghost" style="font-size:12px;padding:8px 12px;" onclick="clearFilters()"><i class="bi bi-x-circle"></i> 초기화</button>
+          </div>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+            <span style="font-size:12px;color:var(--txt3);">결과</span>
+            <span id="filter-count" style="font-size:16px;font-weight:800;color:var(--txt);">—</span><span style="font-size:12px;color:var(--txt3);">건</span>
+          </div>
+        </div>
+        <div class="card"><div class="tbl-wrap" style="max-height:560px;overflow-y:auto;">
+          <table class="data-table"><thead><tr><th>#</th><th>예약자</th><th>팀</th><th>룸</th><th>날짜</th><th>시간</th><th>인원</th><th>목적</th><th>상태</th><th>등록일</th><th></th></tr></thead>
+          <tbody id="all-tbody"></tbody></table></div></div>
+      </div>
+    </div>
+
+    <!-- ═══ ANALYTICS ═══ -->
+    <div class="page" id="page-analytics">
+      <div class="topbar"><div class="topbar-left"><span style="color:var(--txt3);font-size:13px;">StudyMate</span><span class="topbar-sep">›</span><span class="page-title">시간대 분석</span></div></div>
+      <div class="page-body">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;" id="insight-cards" class="stagger"></div>
+        <div style="display:grid;grid-template-columns:1fr .5fr;gap:12px;margin-bottom:14px;">
+          <div class="card"><div class="card-head"><div><div class="card-title">시간대별 인원 vs 건수</div></div></div>
+            <div style="padding:12px 20px 20px;"><div style="position:relative;height:230px;"><canvas id="c-hour2"></canvas></div></div></div>
+          <div class="card"><div class="card-head"><div><div class="card-title">7일 트렌드</div></div></div>
+            <div style="padding:12px 20px 20px;"><div style="position:relative;height:230px;"><canvas id="c-trend2"></canvas></div></div></div>
+        </div>
+        <div class="card" style="margin-bottom:14px;">
+          <div class="card-head"><div><div class="card-title">혼잡도 히트맵</div><div class="card-sub">시간대별 색상 시각화</div></div></div>
+          <div class="heatmap-grid" id="heatmap"></div>
+        </div>
+        <div class="card"><div class="card-head" style="padding-bottom:14px;"><div><div class="card-title">시간대별 혼잡도</div></div></div>
+          <div style="padding:0 20px 20px;" id="cong-list"></div></div>
+      </div>
+    </div>
+
+    <!-- ═══ ROOMS STATS ═══ -->
+    <div class="page" id="page-rooms-stats">
+      <div class="topbar"><div class="topbar-left"><span style="color:var(--txt3);font-size:13px;">StudyMate</span><span class="topbar-sep">›</span><span class="page-title">룸 현황</span></div></div>
+      <div class="page-body">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;" id="room-stat-cards" class="stagger"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="card"><div class="card-head"><div><div class="card-title">룸별 예약 비교</div></div></div>
+            <div style="padding:12px 20px 20px;"><div style="position:relative;height:250px;"><canvas id="c-room-bar"></canvas></div></div></div>
+          <div class="card"><div class="card-head"><div><div class="card-title">이용률 랭킹</div><div class="card-sub">전체 대비 점유율</div></div></div>
+            <div id="room-util" style="padding:4px 0;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ USERS ═══ -->
+    <div class="page" id="page-users">
+      <div class="topbar">
+        <div class="topbar-left"><span style="color:var(--txt3);font-size:13px;">StudyMate</span><span class="topbar-sep">›</span><span class="page-title">유저 관리</span></div>
+        <div class="topbar-right">
+          <div class="search-wrap"><i class="bi bi-search"></i><input class="search-input" id="user-search" placeholder="아이디·이름·팀 검색..." oninput="filterUsers()"></div>
+          <button class="btn-icon" onclick="loadUsers()"><i class="bi bi-arrow-clockwise"></i></button>
+        </div>
+      </div>
+      <div class="page-body">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;" class="stagger">
+          <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:10px;">
+            <div style="width:34px;height:34px;border-radius:var(--r);background:rgba(59,130,246,.1);display:grid;place-items:center;font-size:16px;flex-shrink:0;">👤</div>
+            <div><div style="font-size:20px;font-weight:900;" id="us-total">—</div><div style="font-size:11.5px;color:var(--txt2);">전체 사용자</div></div>
+          </div>
+          <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:10px;">
+            <div style="width:34px;height:34px;border-radius:var(--r);background:rgba(34,197,94,.1);display:grid;place-items:center;font-size:16px;flex-shrink:0;">🔥</div>
+            <div><div style="font-size:20px;font-weight:900;color:var(--green);" id="us-active">—</div><div style="font-size:11.5px;color:var(--txt2);">30일 활성 유저</div></div>
+          </div>
+          <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:10px;">
+            <div style="width:34px;height:34px;border-radius:var(--r);background:rgba(245,158,11,.1);display:grid;place-items:center;font-size:16px;flex-shrink:0;">🏢</div>
+            <div><div style="font-size:20px;font-weight:900;color:var(--amber);" id="us-teams">—</div><div style="font-size:11.5px;color:var(--txt2);">팀 수</div></div>
+          </div>
+        </div>
+        <div class="card"><div class="tbl-wrap" style="max-height:560px;overflow-y:auto;">
+          <table class="data-table"><thead><tr><th>#</th><th>아이디</th><th>표시이름</th><th>팀</th><th>역할</th><th>예약수</th><th>가입일</th><th>관리</th></tr></thead>
+          <tbody id="user-tbody"></tbody></table></div></div>
+      </div>
+    </div>
+
+    <!-- ═══ ROOMS MANAGEMENT ═══ -->
+    <div class="page" id="page-rooms-mgmt">
+      <div class="topbar">
+        <div class="topbar-left"><span style="color:var(--txt3);font-size:13px;">StudyMate</span><span class="topbar-sep">›</span><span class="page-title">룸 관리</span></div>
+        <div class="topbar-right"><button class="btn-icon" onclick="loadRooms()"><i class="bi bi-arrow-clockwise"></i></button></div>
+      </div>
+      <div class="page-body">
+        <div class="sec-head"><div><h2>스터디룸 설정</h2><p>각 룸의 정보·상태를 관리합니다</p></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" id="room-edit-cards"></div>
+      </div>
+    </div>
+
+    <!-- ═══ NOTIFICATIONS ═══ -->
+    <div class="page" id="page-notifications">
+      <div class="topbar">
+        <div class="topbar-left"><span style="color:var(--txt3);font-size:13px;">StudyMate</span><span class="topbar-sep">›</span><span class="page-title">알림 관리</span></div>
+        <div class="topbar-right"><button class="btn btn-primary" onclick="openNotifModal()"><i class="bi bi-send-fill"></i> 새 알림 발송</button></div>
+      </div>
+      <div class="page-body">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;" class="stagger">
+          <div class="kpi-card" style="--kpi-line:var(--brand-g);--kpi-bg:rgba(59,130,246,.1);padding:14px 16px;">
+            <div class="kpi-value" id="ns-total" style="font-size:22px;">—</div><div class="kpi-label">총 발송</div>
+          </div>
+          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,var(--blue),#60a5fa);--kpi-bg:rgba(59,130,246,.1);padding:14px 16px;">
+            <div class="kpi-value" id="ns-info" style="font-size:22px;color:var(--blue);">—</div><div class="kpi-label">💬 일반</div>
+          </div>
+          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#f59e0b,#fcd34d);--kpi-bg:rgba(245,158,11,.1);padding:14px 16px;">
+            <div class="kpi-value" id="ns-warn" style="font-size:22px;color:var(--amber);">—</div><div class="kpi-label">⚠️ 주의</div>
+          </div>
+          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#ef4444,#fca5a5);--kpi-bg:rgba(239,68,68,.1);padding:14px 16px;">
+            <div class="kpi-value" id="ns-urgent" style="font-size:22px;color:var(--red);">—</div><div class="kpi-label">🚨 긴급</div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head" style="padding-bottom:14px;">
+            <div><div class="card-title">발송 내역</div></div>
+            <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px;" onclick="loadNotifAdmin()"><i class="bi bi-arrow-clockwise"></i> 새로고침</button>
+          </div><div id="notif-admin-list" style="padding-bottom:8px;"></div></div>
+      </div>
+    </div>
+
+    <!-- ═══ STORAGE ═══ -->
+    <div class="page" id="page-storage">
+      <div class="topbar">
+        <div class="topbar-left"><span style="color:var(--txt3);font-size:13px;">StudyMate</span><span class="topbar-sep">›</span><span class="page-title">자료 현황</span></div>
+        <div class="topbar-right"><button class="btn-icon" onclick="loadStorage()"><i class="bi bi-arrow-clockwise"></i></button></div>
+      </div>
+      <div class="page-body">
+        <div class="sec-head"><div><h2>스토리지 현황</h2><p>파일 업로드·다운로드 통계를 확인합니다</p></div></div>
+        <!-- 스토리지 메트릭 -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;" class="stagger">
+          <div class="kpi-card" style="--kpi-line:var(--brand-g);--kpi-bg:rgba(59,130,246,.1);padding:16px;">
+            <div class="kpi-icon-wrap">📁</div>
+            <div class="kpi-value" id="st-total-files" style="font-size:24px;">—</div>
+            <div class="kpi-label">총 파일 수</div>
+          </div>
+          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#22c55e,#4ade80);--kpi-bg:rgba(34,197,94,.1);padding:16px;">
+            <div class="kpi-icon-wrap" style="background:rgba(34,197,94,.1);">💾</div>
+            <div class="kpi-value" id="st-total-size" style="font-size:20px;">—</div>
+            <div class="kpi-label">총 사용 용량</div>
+          </div>
+          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#f59e0b,#fcd34d);--kpi-bg:rgba(245,158,11,.1);padding:16px;">
+            <div class="kpi-icon-wrap" style="background:rgba(245,158,11,.1);">📊</div>
+            <div class="kpi-value" id="st-quota-pct" style="font-size:24px;">—</div>
+            <div class="kpi-label">할당량 사용률</div>
+          </div>
+          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#ef4444,#fca5a5);--kpi-bg:rgba(239,68,68,.1);padding:16px;">
+            <div class="kpi-icon-wrap" style="background:rgba(239,68,68,.1);">🔥</div>
+            <div class="kpi-value" id="st-top-dl" style="font-size:13px;font-weight:700;letter-spacing:-.2px;">—</div>
+            <div class="kpi-label">최다 다운로드</div>
+          </div>
+        </div>
+        <!-- 할당량 바 -->
+        <div class="card" style="padding:16px 20px;margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:12.5px;font-weight:600;">스토리지 사용량</span>
+            <span id="st-quota-label" style="font-size:12px;color:var(--txt3);">— / 10 GB</span>
+          </div>
+          <div style="height:8px;background:var(--surface2);border-radius:99px;overflow:hidden;">
+            <div id="st-quota-bar" style="height:100%;border-radius:99px;background:var(--brand-g);width:0;transition:width 1s var(--ease-out);"></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+          <!-- 팀별 사용량 -->
+          <div class="card">
+            <div class="card-head" style="padding-bottom:12px;"><div><div class="card-title">팀별 사용량</div></div></div>
+            <div id="st-by-team" style="padding:0 0 8px;"></div>
+          </div>
+          <!-- 파일 형식별 -->
+          <div class="card">
+            <div class="card-head" style="padding-bottom:12px;"><div><div class="card-title">형식별 현황</div></div></div>
+            <div id="st-by-type" style="padding:0 0 8px;"></div>
+          </div>
+        </div>
+        <!-- 유저별 사용량 -->
+        <div class="card">
+          <div class="card-head" style="padding-bottom:14px;"><div><div class="card-title">사용자별 사용량 Top 10</div></div></div>
+          <div class="tbl-wrap">
+            <table class="data-table">
+              <thead><tr><th>사용자</th><th>팀</th><th>파일 수</th><th>사용량</th><th>사용량 비율</th></tr></thead>
+              <tbody id="st-by-user"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- USER EDIT MODAL -->
+<div class="modal-overlay" id="user-modal" style="display:none;" onclick="closeUserModalOutside(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div style="font-size:14px;font-weight:700;">사용자 정보 수정</div>
+      <button class="btn-icon" onclick="closeUserModal()"><i class="bi bi-x"></i></button>
+    </div>
+    <div style="padding:20px 22px;display:flex;flex-direction:column;gap:14px;">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);">
+        <div id="um-av" style="width:44px;height:44px;border-radius:var(--r);background:linear-gradient(135deg,#3b82f6,#22c55e);display:grid;place-items:center;font-size:18px;font-weight:800;color:#fff;flex-shrink:0;">U</div>
+        <div><div id="um-username" style="font-size:14px;font-weight:700;"></div><div id="um-joined" style="font-size:11.5px;color:var(--txt3);margin-top:2px;"></div></div>
+      </div>
+      <div class="f-group" style="margin:0;">
+        <label class="f-label">표시 이름</label>
+        <input type="text" id="um-display-name" class="f-control" placeholder="표시될 이름">
+      </div>
+      <div class="f-group" style="margin:0;">
+        <label class="f-label">소속 팀</label>
+        <input type="text" id="um-team" class="f-control" placeholder="팀명 입력">
+      </div>
+      <div class="f-group" style="margin:0;">
+        <label class="f-label">역할</label>
+        <div class="select-wrap"><select id="um-role" class="f-control">
+          <option value="user">일반 사용자</option>
+          <option value="admin">관리자</option>
+        </select></div>
+      </div>
+      <button class="btn-submit" style="margin:0;" onclick="saveUserEdit()"><i class="bi bi-check2"></i> 저장</button>
+      <div style="border-top:1px solid var(--border);padding-top:14px;">
+        <div style="font-size:11.5px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">비밀번호 초기화</div>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="um-new-pw" class="f-control" placeholder="새 비밀번호 (6자 이상)" style="flex:1;">
+          <button class="btn btn-ghost" onclick="resetUserPw()"><i class="bi bi-shield-lock"></i> 초기화</button>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:14px;display:flex;justify-content:flex-end;">
+        <button class="btn btn-danger" onclick="deleteUser()"><i class="bi bi-trash3"></i> 계정 삭제</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIF MODAL -->
+<div class="modal-overlay" id="notif-modal" style="display:none;" onclick="closeNotifModalOutside(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div style="font-size:14px;font-weight:700;">새 알림 작성</div>
+      <button class="btn-icon" onclick="closeNotifModal()"><i class="bi bi-x"></i></button>
+    </div>
+    <div style="padding:20px 22px;display:flex;flex-direction:column;gap:14px;">
+      <div><div class="f-label" style="margin-bottom:8px;">알림 유형</div>
+        <div class="notif-type-grid" id="type-grid">
+          <button class="type-btn active" data-type="info" onclick="selectType(this)">💬 일반</button>
+          <button class="type-btn" data-type="warning" onclick="selectType(this)">⚠️ 주의</button>
+          <button class="type-btn" data-type="success" onclick="selectType(this)">✅ 공지</button>
+          <button class="type-btn" data-type="urgent" onclick="selectType(this)">🚨 긴급</button>
+        </div>
+      </div>
+      <div><div class="f-label" style="margin-bottom:8px;">발송 대상</div>
+        <div class="select-wrap"><select id="notif-target" class="f-control"><option value="all">📢 전체 사용자</option></select></div>
+      </div>
+      <div class="f-group" style="margin:0;">
+        <label class="f-label">제목 <span style="color:var(--red);">*</span></label>
+        <input type="text" id="notif-title" class="f-control" placeholder="알림 제목 (최대 100자)" maxlength="100">
+      </div>
+      <div class="f-group" style="margin:0;">
+        <label class="f-label">내용 <span style="color:var(--red);">*</span></label>
+        <textarea id="notif-body" class="f-control" rows="4" placeholder="알림 내용 (최대 1000자)" maxlength="1000" style="resize:vertical;min-height:90px;line-height:1.6;"></textarea>
+        <div style="text-align:right;font-size:11px;color:var(--txt3);margin-top:4px;" id="notif-char">0 / 1000</div>
+      </div>
+      <button id="send-btn" class="btn-submit" style="margin:0;" onclick="sendNotif()"><i class="bi bi-send-fill"></i> 알림 발송</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script src="../js/api.js"></script>
+<script>
+if (!auth.guard('admin')) throw 0;
+
+/* ── CHART DEFAULTS ──────────────────────────────────── */
+Chart.defaults.color       = '#475569';
+Chart.defaults.font.family = 'Pretendard, system-ui, sans-serif';
+Chart.defaults.font.size   = 11;
+Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
+
+const MONTHS       = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+const ROOM_COL_CSS = {'Room A':'#818cf8','Room B':'#38bdf8','Room C':'#fb923c','Room D':'#f472b6'};
+const NOTIF_ICONS  = {info:'💬',warning:'⚠️',success:'✅',urgent:'🚨'};
+const NOTIF_COLS   = {info:'var(--blue)',warning:'var(--amber)',success:'var(--green)',urgent:'var(--red)'};
+const NOTIF_LABELS = {info:'일반',warning:'주의',success:'공지',urgent:'긴급'};
+const TYPE_BTN     = {info:'type-btn',warning:'type-btn',success:'type-btn',urgent:'type-btn'};
+
+/* ── STATE ───────────────────────────────────────────── */
+let allRes=[], stats=null, usersData=[], roomsData=[];
+const charts={};
+const activeFilters={status:'all', room:'all'};
+let selectedType='info', editingUserId=null;
+
+/* ── INIT ────────────────────────────────────────────── */
+document.getElementById('sb-uname').textContent = auth.username();
+document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
+document.getElementById('notif-body').addEventListener('input', e => {
+  document.getElementById('notif-char').textContent = `${e.target.value.length} / 1000`;
+});
+loadAll();
+
+/* ── SIDEBAR ─────────────────────────────────────────── */
+function toggleSb(){ document.getElementById('sb').classList.toggle('collapsed'); }
+function goPage(name, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(name==='analytics')    renderAnalytics();
+  if(name==='rooms-stats')  renderRoomsStats();
+  if(name==='users')        loadUsers();
+  if(name==='rooms-mgmt')   loadRooms();
+  if(name==='notifications')loadNotifAdmin();
+  if(name==='storage')loadStorage();
+}
+function goPageByName(name){
+  const map={overview:0,reservations:1,analytics:2,'rooms-stats':3,users:4,'rooms-mgmt':5,notifications:6,storage:7};
+  goPage(name, document.querySelectorAll('.sb-item')[map[name]||0]);
+}
+
+/* ── DATA LOAD ───────────────────────────────────────── */
+async function loadAll(){
+  try{
+    const [s,r] = await Promise.all([api.stats(), api.allReservations()]);
+    stats  = s;
+    allRes = r.data || r;
+    refreshAllUI();
+    if (!document.getElementById('filter-from').value) setTimeout(initDateFilters, 100);
+  }catch(e){ toast(e.message,'error'); }
+}
+
+/* ── flatpickr 날짜 필터 ─────────────────── */
+function initAdminDatepickers(){
+  if(typeof flatpickr === 'undefined') return;
+  const koLocale = (flatpickr.l10ns && flatpickr.l10ns.ko) || {};
+  const base = { locale:koLocale, dateFormat:'Y-m-d', allowInput:false, disableMobile:true };
+
+  const fpFrom = flatpickr('#filter-from', {
+    ...base,
+    onChange([d]){
+      const ds = d.toISOString().split('T')[0];
+      fpTo.set('minDate', ds);
+      const cur = fpTo.selectedDates[0];
+      if(!cur || cur < d) fpTo.setDate(getMonthEnd(ds));
+      filterRes();
+    }
+  });
+  const fpTo = flatpickr('#filter-to', {
+    ...base,
+    onChange(){ filterRes(); }
+  });
+  window._adminFpFrom = fpFrom;
+  window._adminFpTo   = fpTo;
+}
+window.addEventListener('load', initAdminDatepickers);
+
+function refreshAllUI(){
+  updateBadges();
+  renderKPIs();
+  renderHourChart();
+  renderDonut();
+  renderTrend();
+  renderTeamStats();
+  renderRecentTable();
+  filterRes();
+}
+
+function updateBadges(){
+  const confirmed = allRes.filter(r=>r.status==='confirmed').length;
+  const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  set('badge-total', confirmed);
+  set('kpi-users', usersData.filter(u=>!u.username.startsWith('__deleted')).length || '—');
+}
+
+/* ── OVERVIEW ────────────────────────────────────────── */
+function renderKPIs(){
+  if(!stats) return;
+  const todayStr   = new Date(Date.now()+9*3600000).toISOString().split('T')[0];
+  const confirmed  = allRes.filter(r=>r.status==='confirmed').length;
+  const cancelled  = allRes.filter(r=>r.status==='cancelled').length;
+  const todayCount = allRes.filter(r=>r.status==='confirmed'&&r.date===todayStr).length;
+  const totalHC    = allRes.filter(r=>r.status==='confirmed').reduce((s,r)=>s+r.headcount,0);
+  const avgHC      = confirmed>0 ? (totalHC/confirmed).toFixed(1) : 0;
+  const peak       = (stats.byHour||[]).reduce((a,b)=>a.total_headcount>b.total_headcount?a:b,{start_time:'—',total_headcount:0});
+  const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+  set('kpi-total',     confirmed.toLocaleString());
+  set('kpi-headcount', totalHC.toLocaleString());
+  set('kpi-avg',       avgHC);
+  set('kpi-peak',      peak.start_time);
+  set('kpi-cancelled', cancelled.toLocaleString());
+  set('kpi-today',     todayCount.toLocaleString());
+  set('kpi-top-room',  stats.byRoom&&stats.byRoom[0]?stats.byRoom[0].room_name:'—');
+  set('badge-total',   confirmed);
+  const sorted=[...(stats.byDate||[])].reverse();
+  const counts=sorted.map(d=>d.count), totals=sorted.map(d=>d.total);
+  const maxC=Math.max(...counts,1), maxT=Math.max(...totals,1);
+  renderSpark('spark-total',counts,maxC,'#3b82f6');
+  renderSpark('spark-head', totals,maxT,'#22c55e');
+  renderSpark('spark-avg',  counts.map((c,i)=>totals[i]/(c||1)),Math.max(...counts.map((c,i)=>totals[i]/(c||1)),1),'#f59e0b');
+  renderSpark('spark-peak', counts,maxC,'#ef4444');
+}
+
+function renderSpark(id, vals, max, color){
+  const el=document.getElementById(id); if(!el) return;
+  el.innerHTML=vals.map(v=>{
+    const h=Math.max(5,(v/max)*26), isPeak=v===Math.max(...vals);
+    return `<div class="spark-bar ${isPeak?'peak':''}" style="height:${h}px;background:${color};opacity:${isPeak?.9:.25};"></div>`;
+  }).join('');
+}
+
+function mkChart(id, config){
+  if(charts[id]) charts[id].destroy();
+  const el=document.getElementById(id); if(!el) return;
+  charts[id]=new Chart(el.getContext('2d'), config);
+}
+
+function renderHourChart(){
+  if(!stats||!stats.byHour||!stats.byHour.length) return;
+  const d=stats.byHour, maxV=Math.max(...d.map(x=>x.total_headcount),1);
+  mkChart('c-hour',{type:'bar',data:{labels:d.map(x=>x.start_time),datasets:[{data:d.map(x=>x.total_headcount),backgroundColor:d.map(x=>x.total_headcount===maxV?'rgba(59,130,246,.9)':'rgba(59,130,246,.25)'),borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#475569'}},x:{grid:{display:false},ticks:{color:'#475569'}}}}});
+}
+function renderDonut(){
+  if(!stats||!stats.byRoom||!stats.byRoom.length) return;
+  const d=stats.byRoom;
+  mkChart('c-donut',{type:'doughnut',data:{labels:d.map(x=>x.room_name),datasets:[{data:d.map(x=>x.count),backgroundColor:Object.values(ROOM_COL_CSS),borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{padding:10,usePointStyle:true,pointStyle:'circle',color:'#64748b',font:{size:10}}}}}});
+}
+function renderTrend(){
+  if(!stats||!stats.byDate) return;
+  const sorted=[...stats.byDate].reverse();
+  mkChart('c-trend',{type:'line',data:{labels:sorted.map(d=>d.date.slice(5)),datasets:[{data:sorted.map(d=>d.count),borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,.07)',borderWidth:2,pointRadius:2,pointBackgroundColor:'#22c55e',tension:.4,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#475569'}},x:{grid:{display:false},ticks:{color:'#475569'}}}}});
+}
+function renderTeamStats(){
+  if(!stats||!stats.byTeam) return;
+  const d=stats.byTeam; const max=Math.max(...d.map(x=>x.count),1);
+  document.getElementById('team-stat-list').innerHTML = d.length
+    ? d.map(t=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 20px;border-bottom:1px solid var(--border);">
+        <span style="font-size:12px;font-weight:600;color:var(--txt);width:80px;flex-shrink:0;">${t.team}</span>
+        <div style="flex:1;height:5px;background:var(--surface2);border-radius:99px;overflow:hidden;">
+          <div style="height:100%;width:${Math.round((t.count/max)*100)}%;background:var(--brand-g);border-radius:99px;"></div>
+        </div>
+        <span class="mono" style="font-size:11px;color:var(--txt3);width:30px;text-align:right;">${t.count}</span>
+      </div>`).join('')
+    : '<div style="padding:16px 20px;color:var(--txt3);font-size:13px;">데이터 없음</div>';
+}
+function renderRecentTable(){
+  const confirmed=allRes.filter(r=>r.status==='confirmed');
+  document.getElementById('recent-tbody').innerHTML=confirmed.slice(0,8).map(r=>{
+    const col=ROOM_COL_CSS[r.room_name]||'#3b82f6';
+    return `<tr class="fade-in">
+      <td class="mono">#${r.id}</td>
+      <td><div class="user-pill"><div class="user-dot" style="background:${col}20;color:${col};">${(r.username||'U')[0].toUpperCase()}</div>${r.username||'—'}</div></td>
+      <td><span class="room-tag" style="border-color:${col}30;color:${col};"><i class="bi bi-door-open"></i>${r.room_name}</span></td>
+      <td>${r.date}</td><td style="font-family:var(--mono);font-size:12px;">${r.start_time}~${r.end_time}</td>
+      <td>${crowdBadge(r.headcount)}</td>
+      <td style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--txt2);">${r.purpose||'—'}</td>
+      <td>${statusBadge(r.status)}</td></tr>`;
+  }).join('');
+}
+
+/* ── RESERVATIONS TABLE ──────────────────────────────── */
+function renderResTable(data){
+  const tbody=document.getElementById('all-tbody');
+  document.getElementById('filter-count').textContent=data.length;
+  if(!data.length){ tbody.innerHTML=`<tr><td colspan="11"><div class="empty"><i class="bi bi-calendar-x"></i><p>예약 내역이 없습니다</p></div></td></tr>`; return; }
+  const today=new Date(Date.now()+9*3600000).toISOString().split('T')[0];
+  tbody.innerHTML=data.map(r=>{
+    const col=ROOM_COL_CSS[r.room_name]||'#3b82f6';
+    const created=(r.created_at||'').split('T')[0]||(r.created_at||'').split(' ')[0]||'—';
+    const canCancel=r.status==='confirmed'&&r.date>=today;
+    return `<tr class="fade-in">
+      <td class="mono">#${r.id}</td>
+      <td><div class="user-pill"><div class="user-dot" style="background:${col}20;color:${col};">${(r.username||'U')[0].toUpperCase()}</div><span style="font-weight:600;font-size:13px;">${r.username||'—'}</span></div></td>
+      <td><span class="badge badge-gray" style="font-size:10.5px;">${r.team||'—'}</span></td>
+      <td><span class="room-tag" style="border-color:${col}30;color:${col};"><i class="bi bi-door-open"></i>${r.room_name}</span></td>
+      <td style="font-weight:500;">${r.date}</td>
+      <td style="font-family:var(--mono);font-size:12px;">${r.start_time}~${r.end_time}</td>
+      <td>${crowdBadge(r.headcount)}</td>
+      <td style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--txt2);">${r.purpose||'—'}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td class="mono" style="font-size:11px;color:var(--txt3);">${created}</td>
+      <td>${canCancel?`<button class="btn btn-danger" style="font-size:11px;padding:4px 8px;white-space:nowrap;" onclick="adminCancel(${r.id},this)"><i class="bi bi-x"></i> 취소</button>`:(r.status==='confirmed'?`<span style="font-size:10.5px;color:var(--txt3);">완료됨</span>`:'')}</td>
+    </tr>`;
+  }).join('');
+}
+
+function filterRes(){
+  const q=(document.getElementById('res-search').value||'').toLowerCase();
+  const from=document.getElementById('filter-from').value;
+  const to=document.getElementById('filter-to').value;
+  const data=allRes.filter(r=>{
+    const mQ =!q||(r.username||'').toLowerCase().includes(q)||r.room_name.toLowerCase().includes(q)||(r.team||'').toLowerCase().includes(q)||(r.purpose||'').toLowerCase().includes(q);
+    const mSt=activeFilters.status==='all'||r.status===activeFilters.status;
+    const mRm=activeFilters.room==='all'||r.room_name===activeFilters.room;
+    const mFr=!from||r.date>=from; const mTo=!to||r.date<=to;
+    return mQ&&mSt&&mRm&&mFr&&mTo;
+  });
+  renderResTable(data);
+}
+function setFilter(dim,val,btn){ activeFilters[dim]=val; btn.parentElement.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active')); btn.classList.add('active'); filterRes(); }
+/* 월말 계산 헬퍼 */
+function getMonthEnd(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+  return lastDay.toISOString().split('T')[0];
+}
+function getTodayKST() {
+  return new Date(Date.now() + 9*3600000).toISOString().split('T')[0];
+}
+function initDateFilters() {
+  const today = getTodayKST();
+  if(window._adminFpFrom){ window._adminFpFrom.setDate(today,true); window._adminFpTo.setDate(getMonthEnd(today),true); }
+  else { document.getElementById('filter-from').value=today; document.getElementById('filter-to').value=getMonthEnd(today); }
+  filterRes();
+}
+function onFromChange() {
+  // flatpickr onChange로 처리되므로 fallback용
+  const from = document.getElementById('filter-from').value;
+  const to   = document.getElementById('filter-to').value;
+  if (!to || to < from) document.getElementById('filter-to').value = getMonthEnd(from);
+  filterRes();
+}
+function clearFilters() {
+  const today = getTodayKST();
+  if(window._adminFpFrom){ window._adminFpFrom.setDate(today,true); window._adminFpTo.setDate(getMonthEnd(today),true); }
+  else { document.getElementById('filter-from').value=today; document.getElementById('filter-to').value=getMonthEnd(today); }
+  filterRes();
+}
+
+async function adminCancel(id,btn){
+  const r=allRes.find(x=>x.id===id);
+  const detail=r?`\n\n${r.username||'—'} · ${r.room_name} · ${r.date} · ${r.start_time}~${r.end_time}`:'';
+  if(!confirm(`이 예약을 취소하시겠습니까?${detail}`)) return;
+  const orig=btn.innerHTML; btn.disabled=true; btn.innerHTML='<span class="spin spin-sm"></span>';
+  try{
+    await api.cancelReservation(id);
+    toast('예약이 취소됐습니다.','warning');
+    const idx=allRes.findIndex(x=>x.id===id);
+    if(idx!==-1) allRes[idx].status='cancelled';
+    renderKPIs(); filterRes();
+  }catch(e){ toast(e.message,'error'); btn.disabled=false; btn.innerHTML=orig; }
+}
+
+/* ── ANALYTICS ───────────────────────────────────────── */
+function renderAnalytics(){
+  if(!stats) return;
+  if(!stats.byHour||!stats.byHour.length) return;
+  const peak  = stats.byHour.reduce((a,b)=>a.total_headcount>b.total_headcount?a:b,{start_time:'—',total_headcount:0});
+  const quiet = stats.byHour.reduce((a,b)=>a.total_headcount<b.total_headcount?a:b,{start_time:'—',total_headcount:9999});
+  const busyRoom=stats.byRoom[0]||{room_name:'—',count:0};
+  document.getElementById('insight-cards').innerHTML=`
+    <div class="insight-card fade-in"><div class="insight-icon" style="background:rgba(239,68,68,.12);">🔥</div><div><div class="card-sub" style="margin-bottom:3px;">최대 혼잡</div><div class="insight-val" style="color:var(--red);">${peak.start_time}</div><div class="insight-sub">${peak.total_headcount}명 이용</div></div></div>
+    <div class="insight-card fade-in" style="animation-delay:.06s"><div class="insight-icon" style="background:rgba(59,130,246,.12);">🌙</div><div><div class="card-sub" style="margin-bottom:3px;">최소 혼잡</div><div class="insight-val" style="color:var(--blue);">${quiet.start_time}</div><div class="insight-sub">${quiet.total_headcount}명 이용</div></div></div>
+    <div class="insight-card fade-in" style="animation-delay:.12s"><div class="insight-icon" style="background:rgba(99,102,241,.12);">🏆</div><div><div class="card-sub" style="margin-bottom:3px;">인기 룸</div><div class="insight-val" style="color:var(--indigo);">${busyRoom.room_name}</div><div class="insight-sub">${busyRoom.count}건 예약</div></div></div>`;
+  const d=stats.byHour;
+  mkChart('c-hour2',{type:'bar',data:{labels:d.map(x=>x.start_time),datasets:[{label:'이용 인원',data:d.map(x=>x.total_headcount),backgroundColor:'rgba(59,130,246,.7)',borderRadius:5,yAxisID:'y'},{label:'예약 건수',data:d.map(x=>x.count),backgroundColor:'rgba(34,197,94,.5)',borderRadius:5,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#64748b',usePointStyle:true,pointStyle:'circle'}}},scales:{y:{beginAtZero:true,position:'left',grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#475569'}},y1:{beginAtZero:true,position:'right',grid:{drawOnChartArea:false},ticks:{color:'#475569'}},x:{grid:{display:false},ticks:{color:'#475569'}}}}});
+  const sorted=[...stats.byDate].reverse();
+  mkChart('c-trend2',{type:'line',data:{labels:sorted.map(d=>d.date.slice(5)),datasets:[{label:'예약 건수',data:sorted.map(d=>d.count),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.07)',fill:true,tension:.4,borderWidth:2,pointRadius:2,pointBackgroundColor:'#3b82f6'},{label:'이용 인원',data:sorted.map(d=>d.total),borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,.06)',fill:true,tension:.4,borderWidth:2,pointRadius:2,pointBackgroundColor:'#22c55e'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#64748b',usePointStyle:true,pointStyle:'circle'}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#475569'}},x:{grid:{display:false},ticks:{color:'#475569'}}}}});
+  const max=Math.max(...d.map(x=>x.total_headcount),1);
+  document.getElementById('heatmap').innerHTML=d.map(h=>{
+    const p=h.total_headcount/max;
+    const r2=p>=.75?239:p>=.5?245:p>=.25?59:34, g2=p>=.75?68:p>=.5?158:p>=.25?130:197, b2=p>=.75?68:p>=.5?11:p>=.25?246:94;
+    return `<div class="hm-cell" style="background:rgba(${r2},${g2},${b2},${.08+p*.7});color:rgb(${r2},${g2},${b2});"><span style="font-size:11px;font-weight:900;">${h.total_headcount}</span><span class="hm-time">${h.start_time.slice(0,5)}</span></div>`;
+  }).join('');
+  /* 혼잡도 이중 표기: 전체 누적(회색) + 평균(컬러) */
+  const maxAvg = Math.max(...d.map(h=>h.avg_per_day||0), 1);
+  document.getElementById('cong-list').innerHTML=d.map(h=>{
+    const pct    = Math.round((h.total_headcount/max)*100);
+    const avgPct = Math.min(100, Math.round(((h.avg_per_day||0)/maxAvg)*100));
+    const col    = pct>=75?'var(--red)':pct>=45?'var(--amber)':'var(--green)';
+    const lbl    = pct>=75?'혼잡':pct>=45?'보통':'여유';
+    const avgHC  = h.avg_headcount || 0;
+    return `<div class="cong-row">
+      <span class="cong-time">${h.start_time}</span>
+      <div style="flex:1;display:flex;flex-direction:column;gap:3px;">
+        <div style="position:relative;height:7px;background:var(--surface2);border-radius:99px;overflow:hidden;">
+          <div style="position:absolute;left:0;top:0;height:100%;width:${pct}%;background:${col};opacity:.25;border-radius:99px;"></div>
+          <div style="position:absolute;left:0;top:1px;height:5px;width:${avgPct}%;background:${col};border-radius:99px;transition:width .8s var(--ease-out);"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--txt3);">
+          <span>총 ${h.total_headcount}명 · ${h.count}건</span>
+          <span>평균 ${avgHC}명/회</span>
+        </div>
+      </div>
+      <span class="cong-lbl" style="color:${col};min-width:60px;text-align:right;">${lbl}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ── ROOMS STATS ─────────────────────────────────────── */
+function renderRoomsStats(){
+  if(!stats||!stats.byRoom) return;
+  const d=stats.byRoom, maxC=Math.max(...d.map(x=>x.count),1), total=d.reduce((s,x)=>s+x.count,0);
+  document.getElementById('room-stat-cards').innerHTML=d.map(r=>{
+    const col=ROOM_COL_CSS[r.room_name]||'#3b82f6', pct=Math.round((r.count/maxC)*100);
+    return `<div class="room-stat-card" style="--rc:${col};">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:800;color:${col};">${r.room_name}</div>
+        <span class="badge" style="background:${col}20;color:${col};font-size:10px;">${total?Math.round((r.count/total)*100):0}%</span>
+      </div>
+      <div class="room-stat-val">${r.count}<span style="font-size:14px;font-weight:500;color:var(--txt2);margin-left:4px;">건</span></div>
+      <div class="room-stat-lbl">총 ${r.total}명 이용</div>
+      <div class="room-stat-bar"><div class="room-stat-fill" style="width:${pct}%;background:${col};"></div></div>
+    </div>`;
+  }).join('');
+  mkChart('c-room-bar',{type:'bar',data:{labels:d.map(x=>x.room_name),datasets:[{label:'예약 건수',data:d.map(x=>x.count),backgroundColor:Object.values(ROOM_COL_CSS).map(c=>c+'bb'),borderRadius:7,borderSkipped:false},{label:'총 인원',data:d.map(x=>x.total),backgroundColor:Object.values(ROOM_COL_CSS).map(c=>c+'44'),borderRadius:7,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#64748b',usePointStyle:true,pointStyle:'circle'}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#475569'}},x:{grid:{display:false},ticks:{color:'#475569'}}}}});
+  document.getElementById('room-util').innerHTML=d.map((r,i)=>{
+    const col=Object.values(ROOM_COL_CSS)[i%4], pct=Math.round((r.count/maxC)*100);
+    return `<div class="util-row"><span class="util-room-name" style="color:${col};">${r.room_name}</span><div class="util-bar-wrap"><div class="util-bar-fill" style="width:${pct}%;background:${col};"></div></div><span class="util-pct" style="color:${col};">${pct}%</span><span class="util-cnt">${r.count}건</span></div>`;
+  }).join('');
+}
+
+/* ── USERS ───────────────────────────────────────────── */
+async function loadUsers(){
+  try{
+    const [users, uStats] = await Promise.all([api.userList(), api.userStats()]);
+    usersData = users;
+    // Badge
+    const active = usersData.filter(u=>!u.username.startsWith('__deleted')).length;
+    document.getElementById('badge-users').textContent = active;
+    document.getElementById('kpi-users').textContent   = active;
+    document.getElementById('us-total').textContent    = active;
+    document.getElementById('us-active').textContent   = uStats.active30d || 0;
+    document.getElementById('us-teams').textContent    = uStats.byTeam ? uStats.byTeam.length : 0;
+    renderUsersTable(usersData);
+  }catch(e){ toast(e.message,'error'); }
+}
+function filterUsers(){
+  const q=(document.getElementById('user-search').value||'').toLowerCase();
+  const data=usersData.filter(u=>
+    (u.username||'').toLowerCase().includes(q)||
+    (u.display_name||'').toLowerCase().includes(q)||
+    (u.team||'').toLowerCase().includes(q)
+  );
+  renderUsersTable(data);
+}
+function renderUsersTable(data){
+  const tbody=document.getElementById('user-tbody');
+  const resCount=(uid)=>allRes.filter(r=>r.user_id===uid&&r.status==='confirmed').length;
+  if(!data.length){ tbody.innerHTML=`<tr><td colspan="8"><div class="empty"><i class="bi bi-people"></i><p>사용자가 없습니다</p></div></td></tr>`; return; }
+  tbody.innerHTML=data.filter(u=>!u.username.startsWith('__deleted')).map(u=>{
+    const rc=resCount(u.id);
+    return `<tr class="fade-in">
+      <td class="mono">#${u.id}</td>
+      <td><div class="user-pill"><div class="user-dot" style="background:rgba(59,130,246,.15);color:var(--blue);font-size:11px;">${(u.username||'U')[0].toUpperCase()}</div><span style="font-weight:600;font-size:13px;">${u.username}</span></div></td>
+      <td style="font-size:13px;">${u.display_name||'—'}</td>
+      <td><span class="badge badge-gray" style="font-size:10.5px;">${u.team||'—'}</span></td>
+      <td>${u.role==='admin'?'<span class="badge badge-amber">관리자</span>':'<span class="badge badge-blue">일반</span>'}</td>
+      <td><span class="mono" style="font-size:12px;">${rc}</span>건</td>
+      <td class="mono" style="font-size:11.5px;color:var(--txt3);">${(u.created_at||'').split('T')[0]}</td>
+      <td>
+        <div class="user-row-actions">
+          <button class="btn btn-ghost" style="font-size:11px;padding:4px 8px;" onclick="openUserModal(${u.id})"><i class="bi bi-pencil"></i> 수정</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+/* user modal */
+function openUserModal(uid){
+  const u=usersData.find(x=>x.id===uid); if(!u) return;
+  editingUserId=uid;
+  document.getElementById('um-av').textContent=(u.username||'U')[0].toUpperCase();
+  document.getElementById('um-username').textContent=u.username;
+  document.getElementById('um-joined').textContent='가입일: '+(u.created_at||'').split('T')[0];
+  document.getElementById('um-display-name').value=u.display_name||'';
+  document.getElementById('um-team').value=u.team||'';
+  document.getElementById('um-role').value=u.role||'user';
+  document.getElementById('um-new-pw').value='';
+  document.getElementById('user-modal').style.display='flex';
+}
+function closeUserModal(){ document.getElementById('user-modal').style.display='none'; editingUserId=null; }
+function closeUserModalOutside(e){ if(e.target===document.getElementById('user-modal')) closeUserModal(); }
+async function saveUserEdit(){
+  if(!editingUserId) return;
+  const display_name=document.getElementById('um-display-name').value.trim();
+  const team=document.getElementById('um-team').value.trim();
+  const role=document.getElementById('um-role').value;
+  try{
+    await api.updateUser(editingUserId,{display_name,team,role});
+    toast('사용자 정보가 수정됐습니다.','success');
+    closeUserModal(); await loadUsers();
+  }catch(e){ toast(e.message,'error'); }
+}
+async function resetUserPw(){
+  if(!editingUserId) return;
+  const pw=document.getElementById('um-new-pw').value.trim();
+  if(!pw||pw.length<6){ toast('비밀번호는 6자 이상이어야 합니다.','warning'); return; }
+  if(!confirm('비밀번호를 초기화하시겠습니까?')) return;
+  try{ await api.resetUserPw(editingUserId,{newPassword:pw}); toast('비밀번호가 초기화됐습니다.','success'); document.getElementById('um-new-pw').value=''; }
+  catch(e){ toast(e.message,'error'); }
+}
+async function deleteUser(){
+  if(!editingUserId) return;
+  const u=usersData.find(x=>x.id===editingUserId);
+  if(!confirm(`"${u?.username}" 계정을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
+  try{ await api.deleteUser(editingUserId); toast('계정이 삭제됐습니다.','warning'); closeUserModal(); await loadUsers(); }
+  catch(e){ toast(e.message,'error'); }
+}
+
+/* ── ROOMS MANAGEMENT ────────────────────────────────── */
+async function loadRooms(){
+  try{ roomsData=await api.roomsAll(); renderRoomEditCards(); }
+  catch(e){ toast(e.message,'error'); }
+}
+function renderRoomEditCards(){
+  const d=roomsData;
+  if(!d.length){ document.getElementById('room-edit-cards').innerHTML=`<div class="empty"><i class="bi bi-door-open"></i><p>룸 데이터가 없습니다</p></div>`; return; }
+  document.getElementById('room-edit-cards').innerHTML=d.map(r=>{
+    const col=r.color||'#3b82f6';
+    const amenList=r.amenities?r.amenities.split(',').map(a=>`<span style="font-size:10.5px;padding:2px 8px;border-radius:4px;background:${col}18;color:${col};border:1px solid ${col}30;">${a.trim()}</span>`).join(''):'없음';
+    return `<div class="room-edit-card" data-rid="${r.id}">
+      <div style="padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:10px;height:10px;border-radius:50%;background:${col};box-shadow:0 0 8px ${col}80;flex-shrink:0;"></div>
+          <div style="font-size:14px;font-weight:700;color:${col};">${r.display_name}</div>
+        </div>
+        <label class="room-active-toggle" title="${r.is_active?'활성':'비활성'}">
+          <div class="toggle-sw">
+            <input type="checkbox" ${r.is_active?'checked':''} onchange="toggleRoomActive(${r.id},this.checked)">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </div>
+          <span style="font-size:11.5px;color:${r.is_active?'var(--green)':'var(--txt3)'};">${r.is_active?'활성':'비활성'}</span>
+        </label>
+      </div>
+      <div style="padding:14px 18px;display:flex;flex-direction:column;gap:12px;">
+        <div class="f-group" style="margin:0;">
+          <label class="f-label">표시 이름</label>
+          <input type="text" class="f-control ri-name" value="${r.display_name}" placeholder="화면에 표시될 룸 이름">
+        </div>
+        <div class="f-row" style="gap:10px;">
+          <div class="f-group" style="margin:0;">
+            <label class="f-label">최대 수용 인원</label>
+            <input type="number" class="f-control ri-cap" value="${r.capacity}" min="1" max="50">
+          </div>
+          <div class="f-group" style="margin:0;">
+            <label class="f-label">색상 코드</label>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input type="color" class="ri-color" value="${r.color}" style="width:36px;height:36px;border:1px solid var(--border);border-radius:var(--r-sm);cursor:pointer;background:none;padding:2px;">
+              <input type="text" class="f-control ri-colortext" value="${r.color}" maxlength="7" style="flex:1;">
+            </div>
+          </div>
+        </div>
+        <div class="f-group" style="margin:0;">
+          <label class="f-label">설명</label>
+          <input type="text" class="f-control ri-desc" value="${r.description||''}" placeholder="룸 소개 문구">
+        </div>
+        <div class="f-group" style="margin:0;">
+          <label class="f-label">시설 (쉼표로 구분)</label>
+          <input type="text" class="f-control ri-amen" value="${r.amenities||''}" placeholder="화이트보드, 프로젝터, ...">
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">${amenList}</div>
+        <button class="btn btn-primary" style="font-size:12px;padding:8px 14px;" onclick="saveRoom(${r.id},this)">
+          <i class="bi bi-check2"></i> 저장
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+  // color input sync
+  document.querySelectorAll('.room-edit-card').forEach(card=>{
+    const ci=card.querySelector('.ri-color'), ct=card.querySelector('.ri-colortext');
+    ci.addEventListener('input',()=>ct.value=ci.value);
+    ct.addEventListener('input',()=>{ if(/^#[0-9a-fA-F]{6}$/.test(ct.value)) ci.value=ct.value; });
+  });
+}
+async function toggleRoomActive(id,active){
+  try{ await api.updateRoom(id,{is_active:active}); toast(active?'룸이 활성화됐습니다.':'룸이 비활성화됐습니다.',active?'success':'warning'); }
+  catch(e){ toast(e.message,'error'); }
+}
+async function saveRoom(id,btn){
+  const card=btn.closest('.room-edit-card');
+  const payload={
+    display_name: card.querySelector('.ri-name').value.trim(),
+    capacity:     parseInt(card.querySelector('.ri-cap').value,10),
+    color:        card.querySelector('.ri-colortext').value.trim(),
+    description:  card.querySelector('.ri-desc').value.trim(),
+    amenities:    card.querySelector('.ri-amen').value.trim(),
+  };
+  const orig=btn.innerHTML; btn.disabled=true; btn.innerHTML='<span class="spin spin-sm"></span> 저장 중...';
+  try{
+    await api.updateRoom(id,payload);
+    toast('룸 정보가 저장됐습니다.','success');
+    await loadRooms();
+  }catch(e){ toast(e.message,'error'); }
+  finally{ btn.disabled=false; btn.innerHTML=orig; }
+}
+
+/* ── NOTIFICATIONS ───────────────────────────────────── */
+async function loadNotifAdmin(){
+  const list=document.getElementById('notif-admin-list');
+  list.innerHTML=`<div style="text-align:center;padding:36px;"><span class="spin"></span></div>`;
+  try{
+    const data=await api.notifAdminList();
+    const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+    set('ns-total',  data.length);
+    set('ns-info',   data.filter(n=>n.type==='info').length);
+    set('ns-warn',   data.filter(n=>n.type==='warning').length);
+    set('ns-urgent', data.filter(n=>n.type==='urgent').length);
+    if(!data.length){ list.innerHTML=`<div class="empty"><i class="bi bi-bell-slash"></i><p>발송된 알림이 없습니다</p></div>`; return; }
+    list.innerHTML='';
+    data.forEach(n=>{
+      const col=NOTIF_COLS[n.type]||'var(--blue)', icon=NOTIF_ICONS[n.type]||'💬', lbl=NOTIF_LABELS[n.type]||'일반';
+      const dt=new Date(n.created_at||Date.now());
+      const when=dt.toLocaleDateString('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      const row=document.createElement('div'); row.className='notif-row';
+      row.innerHTML=`
+        <div class="notif-type-icon" style="background:${col}18;">${icon}</div>
+        <div class="notif-row-info">
+          <div class="notif-row-title"></div>
+          <div class="notif-row-body"></div>
+          <div class="notif-row-meta">
+            <span class="badge" style="background:${col}18;color:${col};font-size:10px;">${lbl}</span>
+            <span><i class="bi bi-people" style="font-size:10px;"></i> ${n.target==='all'?'전체':n.target}</span>
+            <span><i class="bi bi-check2-all" style="font-size:10px;"></i> ${n.read_count||0}명 읽음</span>
+            <span><i class="bi bi-clock" style="font-size:10px;"></i> ${when}</span>
+          </div>
+        </div>
+        <div class="notif-row-actions">
+          <button class="btn btn-danger" style="font-size:11px;padding:4px 9px;" data-nid="${n.id}"><i class="bi bi-trash3"></i> 삭제</button>
+        </div>`;
+      row.querySelector('.notif-row-title').textContent=n.title;
+      row.querySelector('.notif-row-body').textContent=n.body;
+      row.querySelector('button[data-nid]').addEventListener('click',()=>deleteNotif(n.id));
+      list.appendChild(row);
+    });
+  }catch(e){ toast(e.message,'error'); }
+}
+async function deleteNotif(id){
+  if(!confirm('이 알림을 삭제하시겠습니까?')) return;
+  try{ await api.notifDelete(id); toast('삭제됐습니다.','warning'); loadNotifAdmin(); }
+  catch(e){ toast(e.message,'error'); }
+}
+
+/* notif modal */
+function openNotifModal(){
+  // populate target from allRes teams
+  const teams=[...new Set(allRes.map(r=>r.team).filter(Boolean))];
+  const sel=document.getElementById('notif-target');
+  sel.innerHTML=`<option value="all">📢 전체 사용자</option>`+teams.map(t=>`<option value="${t}">👥 ${t}</option>`).join('');
+  selectedType='info';
+  document.querySelectorAll('.type-btn').forEach(b=>b.classList.toggle('active',b.dataset.type==='info'));
+  document.getElementById('notif-title').value='';
+  document.getElementById('notif-body').value='';
+  document.getElementById('notif-char').textContent='0 / 1000';
+  document.getElementById('notif-modal').style.display='flex';
+}
+function closeNotifModal(){ document.getElementById('notif-modal').style.display='none'; }
+function closeNotifModalOutside(e){ if(e.target===document.getElementById('notif-modal')) closeNotifModal(); }
+function selectType(btn){ selectedType=btn.dataset.type; document.querySelectorAll('.type-btn').forEach(b=>b.classList.toggle('active',b===btn)); }
+async function sendNotif(){
+  const title=document.getElementById('notif-title').value.trim();
+  const body =document.getElementById('notif-body').value.trim();
+  const target=document.getElementById('notif-target').value;
+  if(!title||!body){ toast('제목과 내용을 입력해주세요.','warning'); return; }
+  const btn=document.getElementById('send-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spin spin-sm"></span> 발송 중...';
+  try{
+    await api.notifCreate({title,body,target,type:selectedType});
+    toast('알림이 발송됐습니다! 📣','success');
+    closeNotifModal(); loadNotifAdmin();
+  }catch(e){ toast(e.message,'error'); }
+  finally{ btn.disabled=false; btn.innerHTML='<i class="bi bi-send-fill"></i> 알림 발송'; }
+}
+
+/* ── STORAGE DASHBOARD ──────────────────────────────── */
+async function loadStorage(){
+  try{
+    const d = await api.storageStats();
+    const fmtSize = b => b>=1073741824?`${(b/1073741824).toFixed(2)} GB`:b>=1048576?`${(b/1048576).toFixed(1)} MB`:`${(b/1024).toFixed(0)} KB`;
+    const pct = d.quota ? Math.min(100,Math.round((d.total_size/d.quota)*100)) : 0;
+    const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+    set('st-total-files', d.total_files.toLocaleString());
+    set('st-total-size',  fmtSize(d.total_size));
+    set('st-quota-pct',   pct+'%');
+    set('st-quota-label', `${fmtSize(d.total_size)} / ${fmtSize(d.quota)}`);
+    set('st-top-dl', d.topDL[0]?`${d.topDL[0].title} (${d.topDL[0].download_count}회)`:'—');
+    const bar = document.getElementById('st-quota-bar');
+    if(bar){ bar.style.width=pct+'%'; bar.style.background=pct>=90?'var(--red)':pct>=70?'var(--amber)':'var(--brand-g)'; }
+    // 팀별
+    const maxSz = Math.max(...(d.byTeam||[]).map(t=>t.sz),1);
+    document.getElementById('st-by-team').innerHTML = d.byTeam.length
+      ? d.byTeam.map(t=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 20px;border-bottom:1px solid var(--border);">
+          <span style="font-size:12px;font-weight:600;width:80px;flex-shrink:0;">${t.team||'—'}</span>
+          <div style="flex:1;height:5px;background:var(--surface2);border-radius:99px;overflow:hidden;">
+            <div style="height:100%;width:${Math.round((t.sz/maxSz)*100)}%;background:var(--brand-g);border-radius:99px;"></div>
+          </div>
+          <span class="mono" style="font-size:11px;color:var(--txt3);width:60px;text-align:right;">${fmtSize(t.sz)}</span>
+        </div>`).join('')
+      : '<div style="padding:16px 20px;color:var(--txt3);font-size:13px;">데이터 없음</div>';
+    // 형식별
+    const FILE_ICONS = {pdf:'📄',pptx:'📊',ppt:'📊',docx:'📝',doc:'📝',xlsx:'📗',xls:'📗',zip:'🗜️',png:'🖼️',jpg:'🖼️',jpeg:'🖼️'};
+    const maxCnt = Math.max(...(d.byType||[]).map(t=>t.cnt),1);
+    document.getElementById('st-by-type').innerHTML = d.byType.length
+      ? d.byType.map(t=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 20px;border-bottom:1px solid var(--border);">
+          <span style="font-size:16px;width:24px;text-align:center;">${FILE_ICONS[t.file_type]||'📁'}</span>
+          <span style="font-size:12px;font-weight:600;width:50px;flex-shrink:0;text-transform:uppercase;">${t.file_type}</span>
+          <div style="flex:1;height:5px;background:var(--surface2);border-radius:99px;overflow:hidden;">
+            <div style="height:100%;width:${Math.round((t.cnt/maxCnt)*100)}%;background:linear-gradient(90deg,#6366f1,#818cf8);border-radius:99px;"></div>
+          </div>
+          <span class="mono" style="font-size:11px;color:var(--txt3);width:70px;text-align:right;">${t.cnt}개 · ${fmtSize(t.sz)}</span>
+        </div>`).join('')
+      : '<div style="padding:16px 20px;color:var(--txt3);font-size:13px;">데이터 없음</div>';
+    // 유저별
+    const maxUSz = Math.max(...(d.byUser||[]).map(u=>u.sz),1);
+    document.getElementById('st-by-user').innerHTML = d.byUser.length
+      ? d.byUser.map(u=>`<tr class="fade-in">
+          <td><div class="user-pill"><div class="user-dot" style="background:rgba(59,130,246,.15);color:var(--blue);">${(u.username||'U')[0].toUpperCase()}</div>${u.display_name||u.username}</div></td>
+          <td><span class="badge badge-gray">${u.team||'—'}</span></td>
+          <td class="mono">${u.cnt}개</td>
+          <td class="mono">${fmtSize(u.sz)}</td>
+          <td style="width:160px;">
+            <div style="height:5px;background:var(--surface2);border-radius:99px;overflow:hidden;">
+              <div style="height:100%;width:${Math.round((u.sz/maxUSz)*100)}%;background:var(--brand-g);border-radius:99px;"></div>
+            </div>
+          </td>
+        </tr>`).join('')
+      : '<tr><td colspan="5"><div class="empty"><i class="bi bi-folder2-open"></i><p>자료가 없습니다</p></div></td></tr>';
+  }catch(e){ toast(e.message,'error'); }
+}
+
+/* ── HELPERS ─────────────────────────────────────────── */
+function crowdBadge(n){ if(n<=2) return `<span class="badge badge-blue">${n}명 여유</span>`; if(n<=5) return `<span class="badge badge-amber">${n}명 보통</span>`; return `<span class="badge badge-red">${n}명 혼잡</span>`; }
+function statusBadge(s){ return s==='confirmed'?'<span class="badge badge-green"><i class="bi bi-check-circle-fill"></i> 확정</span>':'<span class="badge badge-gray"><i class="bi bi-x-circle"></i> 취소됨</span>'; }
+</script>
+</body>
+</html>
