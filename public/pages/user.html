@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyMate — 예약</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <!-- 컴포넌트 스타일은 css/style.css에 통합됨 -->
+</head>
+<body>
+<div class="sidebar-backdrop" id="sidebar-backdrop" data-action="closeMobileSidebar"></div>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sb">
+    <div class="sb-brand">
+      <div class="sb-brand-icon">📚</div>
+      <span class="sb-brand-name">StudyMate</span>
+      <button class="sb-toggle" data-action="toggleSb" aria-label="사이드바 접기/펼치기"><i class="bi bi-layout-sidebar-reverse"></i></button>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-section">메뉴</div>
+      <button class="sb-item active" data-tip="예약하기" data-action="goPage" data-val="reserve">
+        <i class="bi bi-calendar-plus-fill"></i><span class="sb-label">예약하기</span>
+      </button>
+      <button class="sb-item" data-tip="예약 내역" data-action="goPage" data-val="history">
+        <i class="bi bi-clock-history"></i><span class="sb-label">예약 내역</span>
+      </button>
+      <button class="sb-item" data-tip="즐겨찾기" data-action="goPage" data-val="favorites">
+        <i class="bi bi-bookmark-star-fill"></i><span class="sb-label">즐겨찾기</span>
+        <span class="sb-badge" id="fav-badge" style="display:none;"></span>
+      </button>
+      <div class="sb-section" style="margin-top:6px;">자료</div>
+      <button class="sb-item" data-tip="활동 기록" data-action="goPage" data-val="sessions">
+        <i class="bi bi-journal-text"></i><span class="sb-label">활동 기록</span>
+      </button>
+      <button class="sb-item" data-tip="팀 자료함" data-action="goPage" data-val="library">
+        <i class="bi bi-folder2-open"></i><span class="sb-label">팀 자료함</span>
+        <span class="sb-badge" id="lib-badge" style="display:none;"></span>
+      </button>
+      <button class="sb-item" data-tip="통합 검색" data-action="goPage" data-val="search">
+        <i class="bi bi-search"></i><span class="sb-label">통합 검색</span>
+      </button>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user" style="cursor:pointer;" data-action="openProfile" title="프로필 설정">
+        <div class="sb-avatar" id="sb-av" style="background:linear-gradient(135deg,#3b82f6,#22c55e);">U</div>
+        <div class="sb-user-info">
+          <div class="sb-username" id="sb-uname">—</div>
+          <div class="sb-role" id="sb-team-lbl">—</div>
+        </div>
+        <i class="bi bi-gear" style="font-size:13px;color:var(--txt3);margin-left:auto;flex-shrink:0;"></i>
+      </div>
+      <button class="sb-item" data-action="themeToggle" title="테마 전환" data-tip="테마 전환" style="margin-bottom:6px;border:1px solid var(--border);">
+        <i class="bi bi-moon-stars-fill theme-icon-el" style="font-size:16px;"></i><span class="sb-label">테마 전환</span>
+      </button>
+      <button class="sb-logout" data-action="logout">
+        <i class="bi bi-box-arrow-left"></i><span class="sb-label">로그아웃</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div id="toast-stack" class="toast-stack"></div>
+
+    <!-- ═══ PAGE: RESERVE ═══ -->
+    <div class="page active" id="page-reserve">
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn btn-icon" data-action="openMobileSidebar" aria-label="메뉴" style="display:none;margin-right:4px;"><i class="bi bi-list" style="font-size:18px;"></i></button>
+          <span style="color:var(--txt3);font-size:13px;">StudyMate</span>
+          <span class="topbar-sep">›</span><span class="page-title">예약하기</span>
+        </div>
+        <div class="topbar-right">
+          <div class="live-chip"><div class="live-dot"></div>실시간</div>
+          <button class="btn-icon" data-action="toggleNotifDrawer" style="position:relative;" aria-label="알림">
+            <i class="bi bi-bell-fill"></i>
+            <span id="notif-dot" style="display:none;position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 6px var(--red);pointer-events:none;"></span>
+          </button>
+        </div>
+      </div>
+      <div class="page-body" style="display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start;">
+        <!-- LEFT -->
+        <div style="display:flex;flex-direction:column;gap:14px;">
+
+          <!-- Today's schedule widget -->
+          <div class="today-widget" id="today-widget" style="display:none;">
+            <div style="padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:13px;font-weight:700;">📅 오늘 내 예약</span>
+                <span class="badge badge-blue" id="today-count">0건</span>
+              </div>
+            </div>
+            <div id="today-list"></div>
+          </div>
+
+          <!-- Room info tabs -->
+          <div class="room-info-card">
+            <div style="padding:12px 18px 0;">
+              <div style="font-size:13px;font-weight:700;margin-bottom:10px;">🚪 스터디룸 선택</div>
+              <div class="room-tab-row" id="room-tabs"></div>
+            </div>
+            <div id="room-detail" style="padding:14px 18px;"></div>
+            <!-- Room option grid -->
+            <div style="padding:0 18px 18px;">
+              <div class="room-grid-sel" id="room-opts"></div>
+            </div>
+          </div>
+
+          <!-- Calendar -->
+          <div class="cal-outer">
+            <div class="cal-head">
+              <span class="cal-title" id="cal-title">—</span>
+              <div class="cal-ctrl">
+                <div class="view-tog">
+                  <button class="view-btn active" id="vbtn-month" data-action="setView" data-val="month">월</button>
+                  <button class="view-btn" id="vbtn-week" data-action="setView" data-val="week">주</button>
+                </div>
+                <button class="btn-icon" style="width:26px;height:26px;font-size:12px;" data-action="moveMonth" data-val="-1"><i class="bi bi-chevron-left"></i></button>
+                <button class="btn-icon" style="width:26px;height:26px;font-size:12px;" data-action="moveMonth" data-val="1"><i class="bi bi-chevron-right"></i></button>
+              </div>
+            </div>
+            <div class="cal-filter">
+              <span style="font-size:10.5px;font-weight:600;color:var(--txt3);">표시:</span>
+              <button class="fpill on" id="fp-mine" style="background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.3);color:var(--green);" data-action="toggleFP" data-val="mine"><span style="width:5px;height:5px;border-radius:50%;background:var(--green);display:inline-block;"></span>내 예약</button>
+              <button class="fpill on" id="fp-A" style="background:rgba(129,140,248,.12);border-color:rgba(129,140,248,.3);color:#818cf8;" data-action="toggleFP" data-val="A"><span style="width:5px;height:5px;border-radius:50%;background:#818cf8;display:inline-block;"></span>A</button>
+              <button class="fpill on" id="fp-B" style="background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.3);color:#38bdf8;" data-action="toggleFP" data-val="B"><span style="width:5px;height:5px;border-radius:50%;background:#38bdf8;display:inline-block;"></span>B</button>
+              <button class="fpill on" id="fp-C" style="background:rgba(251,146,60,.12);border-color:rgba(251,146,60,.3);color:#fb923c;" data-action="toggleFP" data-val="C"><span style="width:5px;height:5px;border-radius:50%;background:#fb923c;display:inline-block;"></span>C</button>
+              <button class="fpill on" id="fp-D" style="background:rgba(244,114,182,.12);border-color:rgba(244,114,182,.3);color:#f472b6;" data-action="toggleFP" data-val="D"><span style="width:5px;height:5px;border-radius:50%;background:#f472b6;display:inline-block;"></span>D</button>
+            </div>
+            <div class="cal-grid-wrap">
+              <div class="cal-dow-row">
+                <div class="cal-dow">일</div><div class="cal-dow">월</div><div class="cal-dow">화</div>
+                <div class="cal-dow">수</div><div class="cal-dow">목</div><div class="cal-dow">금</div><div class="cal-dow">토</div>
+              </div>
+              <div class="cal-days" id="cal-days"></div>
+            </div>
+            <div class="cal-legend">
+              <div style="display:flex;align-items:center;gap:3px;"><div style="width:6px;height:6px;border-radius:50%;background:var(--green);"></div>내 예약</div>
+              <div style="display:flex;align-items:center;gap:3px;"><div style="width:6px;height:6px;border-radius:50%;background:#818cf8;"></div>A</div>
+              <div style="display:flex;align-items:center;gap:3px;"><div style="width:6px;height:6px;border-radius:50%;background:#38bdf8;"></div>B</div>
+              <div style="display:flex;align-items:center;gap:3px;"><div style="width:6px;height:6px;border-radius:50%;background:#fb923c;"></div>C</div>
+              <div style="display:flex;align-items:center;gap:3px;"><div style="width:6px;height:6px;border-radius:50%;background:#f472b6;"></div>D</div>
+            </div>
+          </div>
+
+          <!-- Time + headcount + purpose -->
+          <div class="card">
+            <div class="card-head" style="padding-bottom:14px;">
+              <div>
+                <div class="card-title">시간·인원·목적</div>
+                <div class="card-sub" id="sel-date-lbl">캘린더에서 날짜를 먼저 선택하세요</div>
+              </div>
+              <!-- 즐겨찾기 퀵픽 드롭다운 -->
+              <div style="position:relative;">
+                <button class="btn btn-ghost" style="font-size:11.5px;padding:5px 10px;" data-action="toggleFavDropdown" id="fav-drop-btn">
+                  <i class="bi bi-bookmark-star-fill" style="color:var(--blue);"></i> 즐겨찾기
+                  <i class="bi bi-chevron-down" style="font-size:9px;margin-left:2px;" id="fav-drop-chevron"></i>
+                </button>
+                <div id="fav-dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 6px);width:280px;background:var(--bg-card);border:1px solid var(--border-hover);border-radius:var(--r-lg);box-shadow:var(--shadow-xl);z-index:300;overflow:hidden;">
+                  <div style="padding:10px 14px 8px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+                    <span style="font-size:12px;font-weight:700;color:var(--txt);">즐겨찾기 불러오기</span>
+                    <button data-action="goFavoritesPage" style="font-size:10.5px;color:var(--blue);background:none;border:none;cursor:pointer;font-weight:600;">관리 →</button>
+                  </div>
+                  <div id="fav-dropdown-list" style="max-height:220px;overflow-y:auto;"></div>
+                  <div style="padding:8px 10px;border-top:1px solid var(--border);background:var(--bg-surface);">
+                    <button class="btn btn-ghost" style="width:100%;justify-content:center;font-size:11.5px;padding:6px;" data-action="saveFavFromReserve">
+                      <i class="bi bi-bookmark-plus"></i> 현재 설정 저장
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="padding:0 20px 20px;">
+              <div class="f-row" style="margin-bottom:12px;">
+                <div class="f-group" style="margin:0;">
+                  <label class="f-label">시작 시간</label>
+                  <div class="select-wrap"><select id="f-start" class="f-control" data-action="selectChange" data-fn="updatePreview">
+                    <option value="">선택</option>
+                    <option>09:00</option><option>10:00</option><option>11:00</option>
+                    <option>12:00</option><option>13:00</option><option>14:00</option>
+                    <option>15:00</option><option>16:00</option><option>17:00</option>
+                  </select></div>
+                </div>
+                <div class="f-group" style="margin:0;">
+                  <label class="f-label">종료 시간</label>
+                  <div class="select-wrap"><select id="f-end" class="f-control" data-action="selectChange" data-fn="updatePreview">
+                    <option value="">선택</option>
+                    <option>10:00</option><option>11:00</option><option>12:00</option>
+                    <option>13:00</option><option>14:00</option><option>15:00</option>
+                    <option>16:00</option><option>17:00</option><option>18:00</option>
+                  </select></div>
+                </div>
+              </div>
+              <div class="f-group" style="margin-bottom:12px;">
+                <label class="f-label">이용 인원</label>
+                <div class="hc-wrap">
+                  <button class="hc-btn" data-action="changeHc" data-val="-1">−</button>
+                  <div class="hc-display"><span id="hc-val">1</span>명</div>
+                  <button class="hc-btn" data-action="changeHc" data-val="1">+</button>
+                </div>
+              </div>
+              <div class="f-group" style="margin-bottom:0;">
+                <label class="f-label">예약 목적 <span style="color:var(--txt3);font-weight:400;text-transform:none;">(선택)</span></label>
+                <input type="text" id="f-purpose" class="f-control" placeholder="예: 팀 회의, 발표 연습, 스터디..." maxlength="50">
+              </div>
+              <!-- 반복 예약 -->
+              <div class="f-group" style="margin-bottom:0;">
+                <label class="f-label">🔁 반복 예약 <span style="color:var(--txt3);font-weight:400;text-transform:none;">(선택)</span></label>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <div class="select-wrap" style="flex:1;">
+                    <select id="f-recurrence" class="f-control" data-type=""
+                      onchange="toggleRecurrenceCount()" style="padding-right:32px;">
+                      <option value="">반복 없음</option>
+                      <option value="daily">매일</option>
+                      <option value="weekdays">평일만</option>
+                      <option value="weekly">매주 같은 요일</option>
+                      <option value="biweekly">격주</option>
+                      <option value="monthly">매월 같은 날</option>
+                    </select>
+                  </div>
+                  <label id="f-recurrence-count-label" style="display:none;font-size:13px;color:var(--txt2);white-space:nowrap;">총</label>
+                  <input id="f-recurrence-count" type="number" min="2" max="52" value="4"
+                    style="display:none;width:70px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card-bg);color:var(--txt1);font-size:14px;"
+                    onchange="updateRecurrenceRule()" oninput="updateRecurrenceRule()">
+                  <label id="f-recurrence-count-label2" style="display:none;font-size:13px;color:var(--txt2);white-space:nowrap;">회</label>
+                </div>
+              </div>
+              <button class="btn-submit" id="submit-btn" data-action="submitRes">
+                <i class="bi bi-check2-circle"></i> 예약 확정
+              </button>
+            </div>
+          </div>
+        </div><!-- /LEFT -->
+
+        <!-- RIGHT -->
+        <div style="display:flex;flex-direction:column;gap:12px;position:sticky;top:70px;">
+
+          <!-- Team Panel -->
+          <div class="team-panel">
+            <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+              <div style="width:30px;height:30px;border-radius:var(--r-sm);background:rgba(34,197,94,.12);display:grid;place-items:center;font-size:14px;">🏢</div>
+              <div>
+                <div style="font-size:13px;font-weight:700;">팀 예약 현황</div>
+                <div style="font-size:11px;color:var(--txt3);margin-top:1px;" id="team-name-lbl">로딩 중...</div>
+              </div>
+              <span class="badge badge-green" id="team-count-badge" style="display:none;margin-left:auto;"></span>
+            </div>
+            <!-- 기간 필터 -->
+            <div style="padding:6px 10px;border-bottom:1px solid var(--border);display:flex;gap:3px;flex-wrap:wrap;">
+              <button class="tp-btn" id="tp-week" data-action="setTeamPeriod" data-val="week">이번 주</button>
+              <button class="tp-btn on" id="tp-month" data-action="setTeamPeriod" data-val="month">이번 달</button>
+              <button class="tp-btn" id="tp-prev" data-action="setTeamPeriod" data-val="prev_month">지난 달</button>
+              <button class="tp-btn" id="tp-upcoming" data-action="setTeamPeriod" data-val="upcoming">30일 예정</button>
+            </div>
+            <!-- 룸 필터 -->
+            <div class="team-filter">
+              <button class="tp-btn on" data-action="setTF" data-val="all">전체</button>
+              <button class="tp-btn" data-action="setTF" data-val="mine">내 예약</button>
+              <button class="tp-btn" data-action="setTF" data-val="A">A</button>
+              <button class="tp-btn" data-action="setTF" data-val="B">B</button>
+              <button class="tp-btn" data-action="setTF" data-val="C">C</button>
+              <button class="tp-btn" data-action="setTF" data-val="D">D</button>
+            </div>
+            <!-- 기간 요약 -->
+            <div id="team-period-summary" style="display:none;padding:6px 14px;background:var(--bg-surface);border-bottom:1px solid var(--border);font-size:11px;"></div>
+            <div class="team-body" id="team-body">
+              <div class="team-empty" style="text-align:center;padding:28px;color:var(--txt3);font-size:13px;"><i class="bi bi-people" style="font-size:26px;display:block;margin-bottom:8px;opacity:.2;"></i><p>로딩 중...</p></div>
+            </div>
+            <div style="padding:10px 14px;border-top:1px solid var(--border);">
+              <button class="btn-ghost" style="width:100%;justify-content:center;font-size:12px;" data-action="refreshTeamStatus">
+                <i class="bi bi-arrow-clockwise"></i> 새로고침
+              </button>
+            </div>
+          </div>
+
+          <!-- Booking Preview -->
+          <div class="prev-card">
+            <div class="prev-head">
+              <div><div class="card-title">예약 미리보기</div><div class="card-sub" id="prev-sub">날짜·시간을 선택하세요</div></div>
+              <span id="prev-ready" style="display:none;"></span>
+            </div>
+            <div id="prev-empty" style="text-align:center;padding:16px 0 18px;color:var(--txt3);font-size:12px;">
+              <i class="bi bi-calendar3" style="font-size:24px;display:block;margin-bottom:8px;opacity:.18;"></i>정보 입력 후 표시됩니다
+            </div>
+            <div id="prev-filled" style="display:none;">
+              <div style="padding:12px 18px;background:var(--bg-surface);border-bottom:1px solid var(--border);display:flex;align-items:baseline;gap:10px;">
+                <span id="prev-day-big" style="font-size:34px;font-weight:900;letter-spacing:-1.5px;color:var(--txt);line-height:1;">—</span>
+                <div><div id="prev-monyear" style="font-size:12px;font-weight:600;color:var(--txt2);">—</div><div id="prev-wd" style="font-size:10.5px;color:var(--txt3);">—</div></div>
+              </div>
+              <div class="prev-row"><span class="prev-key">룸</span><span id="prev-room" class="badge badge-blue">—</span></div>
+              <div class="prev-row"><span class="prev-key">시간</span><span style="font-family:var(--font-mono);font-size:12.5px;font-weight:600;" id="prev-time">—</span></div>
+              <div class="prev-row"><span class="prev-key">인원</span><span id="prev-hc">—</span></div>
+              <div id="prev-conflict" style="display:none;padding:10px 14px 12px;border-top:1px solid var(--border);">
+                <div style="font-size:10.5px;font-weight:700;color:var(--red);letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:5px;"><i class="bi bi-exclamation-triangle-fill"></i> 이 시간 동일 룸 예약</div>
+                <div id="prev-conflict-list"></div>
+              </div>
+              <div id="prev-timeline" style="display:none;padding:10px 14px 12px;border-top:1px solid var(--border);">
+                <div style="font-size:10.5px;font-weight:700;color:var(--txt3);letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px;">이 날 <span id="prev-timeline-room"></span> 전체 예약</div>
+                <div id="prev-timeline-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Prediction -->
+          <div class="pred-panel">
+            <div class="pred-head">
+              <div class="pred-icon">🔮</div>
+              <div>
+                <div style="font-size:12.5px;font-weight:700;">시간대별 혼잡도</div>
+                <div style="font-size:10.5px;color:var(--txt3);margin-top:1px;" id="pred-sub">날짜 선택 시 자동 표시</div>
+              </div>
+            </div>
+            <div id="pred-body">
+              <div class="pred-inner" style="text-align:center;padding:14px 0;color:var(--txt3);font-size:11.5px;">
+                <i class="bi bi-bar-chart" style="font-size:20px;display:block;margin-bottom:6px;opacity:.18;"></i>달력에서 날짜를 클릭하세요
+              </div>
+            </div>
+          </div>
+        </div><!-- /RIGHT -->
+      </div>
+    </div>
+
+    <!-- ═══ PAGE: HISTORY ═══ -->
+    <div class="page" id="page-history">
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn btn-icon" data-action="openMobileSidebar" aria-label="메뉴" style="display:none;margin-right:4px;"><i class="bi bi-list" style="font-size:18px;"></i></button>
+          <span style="color:var(--txt3);font-size:13px;">StudyMate</span>
+          <span class="topbar-sep">›</span><span class="page-title">예약 내역</span>
+        </div>
+        <div class="topbar-right">
+          <div class="search-wrap"><i class="bi bi-search"></i>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <input class="search-input" id="hist-search" placeholder="룸·목적 검색..." oninput="renderHist()">
+              <button onclick="downloadReservationsCsv()" style="padding:8px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;">
+                <i class="bi bi-download"></i> CSV
+              </button>
+            </div>
+          </div>
+          <button class="btn-icon" data-action="loadHist"><i class="bi bi-arrow-clockwise"></i></button>
+          <button class="btn-icon" data-action="toggleNotifDrawer" style="position:relative;" aria-label="알림">
+            <i class="bi bi-bell-fill"></i>
+            <span id="notif-dot2" style="display:none;position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:var(--red);pointer-events:none;"></span>
+          </button>
+        </div>
+      </div>
+      <div class="page-body">
+        <div class="sec-head">
+          <div><h2>내 예약 내역</h2><p>나의 모든 예약 목록입니다</p></div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;">
+            <button class="filter-chip active" data-action="setHF" data-val="all">전체</button>
+            <button class="filter-chip" data-action="setHF" data-val="upcoming">예정</button>
+            <button class="filter-chip" data-action="setHF" data-val="past">지난 예약</button>
+            <button class="filter-chip" data-action="setHF" data-val="cancelled">취소됨</button>
+            <div style="width:1px;background:var(--border);margin:0 2px;"></div>
+            <button class="filter-chip" data-action="setHF" data-val="A">Room A</button>
+            <button class="filter-chip" data-action="setHF" data-val="B">Room B</button>
+            <button class="filter-chip" data-action="setHF" data-val="C">Room C</button>
+            <button class="filter-chip" data-action="setHF" data-val="D">Room D</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="tbl-wrap">
+            <table class="data-table">
+              <thead><tr><th>#</th><th>스터디룸</th><th>날짜</th><th>시간</th><th>인원</th><th>목적</th><th>상태</th><th></th></tr></thead>
+              <tbody id="hist-tbody">
+                <tr><td colspan="8" style="text-align:center;padding:36px;"><span class="spin"></span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PAGE: FAVORITES ═══ -->
+    <div class="page" id="page-favorites">
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn btn-icon" data-action="openMobileSidebar" aria-label="메뉴" style="display:none;margin-right:4px;"><i class="bi bi-list" style="font-size:18px;"></i></button>
+          <span style="color:var(--txt3);font-size:13px;">StudyMate</span>
+          <span class="topbar-sep">›</span><span class="page-title">즐겨찾기</span>
+        </div>
+        <div class="topbar-right">
+          <button class="btn-icon" data-action="loadFavorites"><i class="bi bi-arrow-clockwise"></i></button>
+        </div>
+      </div>
+      <div class="page-body">
+        <div class="sec-head">
+          <div><h2>즐겨찾기</h2><p>자주 쓰는 예약 패턴을 저장하고 한 번에 불러옵니다 (최대 10개)</p></div>
+          <button class="btn btn-primary" style="font-size:12px;padding:7px 14px;" data-action="toggleFavAdd">
+            <i class="bi bi-plus-circle"></i> 새 즐겨찾기
+          </button>
+        </div>
+        <!-- 즐겨찾기 추가 폼 (토글) -->
+        <div id="fav-add-card" class="card" style="padding:18px 20px;margin-bottom:16px;display:none;">
+          <div style="font-size:13px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+            <i class="bi bi-bookmark-plus-fill" style="color:var(--blue);"></i> 즐겨찾기 추가
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+            <div class="f-group" style="margin:0;">
+              <label class="f-label">이름 <span style="color:var(--red);">*</span></label>
+              <input type="text" id="fav-label" class="f-control" placeholder="예: 매주 월요일 팀 미팅" maxlength="30">
+            </div>
+            <div class="f-group" style="margin:0;">
+              <label class="f-label">스터디룸</label>
+              <div class="select-wrap">
+                <select id="fav-room" class="f-control" style="padding:9px 28px 9px 10px;font-size:13px;">
+                  <option value="Room A">🅰️ Room A</option>
+                  <option value="Room B">🅱️ Room B</option>
+                  <option value="Room C">🆒 Room C</option>
+                  <option value="Room D">🔷 Room D</option>
+                </select>
+              </div>
+            </div>
+            <div class="f-group" style="margin:0;">
+              <label class="f-label">시작 시간</label>
+              <div class="select-wrap">
+                <select id="fav-start" class="f-control" style="padding:9px 28px 9px 10px;font-size:13px;">
+                  <option>09:00</option><option>10:00</option><option>11:00</option>
+                  <option>12:00</option><option>13:00</option><option>14:00</option>
+                  <option>15:00</option><option>16:00</option><option>17:00</option>
+                </select>
+              </div>
+            </div>
+            <div class="f-group" style="margin:0;">
+              <label class="f-label">종료 시간</label>
+              <div class="select-wrap">
+                <select id="fav-end" class="f-control" style="padding:9px 28px 9px 10px;font-size:13px;">
+                  <option>10:00</option><option>11:00</option><option>12:00</option>
+                  <option>13:00</option><option>14:00</option><option>15:00</option>
+                  <option>16:00</option><option>17:00</option><option>18:00</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;">
+            <div class="f-group" style="margin:0;">
+              <label class="f-label">인원</label>
+              <div class="hc-wrap" style="gap:6px;">
+                <button class="hc-btn" data-action="changeFavHc" data-val="-1">−</button>
+                <div class="hc-display" style="min-width:50px;"><span id="fav-hc-val">1</span>명</div>
+                <button class="hc-btn" data-action="changeFavHc" data-val="1">+</button>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-left:auto;">
+              <button class="btn btn-ghost" style="font-size:12px;" data-action="toggleFavAdd">취소</button>
+              <button class="btn btn-primary" style="font-size:12px;" data-action="saveFavoriteDirect">
+                <i class="bi bi-bookmark-plus-fill"></i> 저장
+              </button>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--txt3);margin-top:10px;display:flex;align-items:center;gap:5px;">
+            <i class="bi bi-info-circle"></i> 날짜는 저장되지 않습니다. 적용 후 달력에서 날짜를 선택하세요.
+          </div>
+        </div>
+        <div id="fav-list"></div>
+      </div>
+    </div>
+
+  <!-- ═══ PAGE: SESSIONS ═══ -->
+  <div class="page" id="page-sessions">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn btn-icon" data-action="openMobileSidebar" aria-label="메뉴" style="display:none;margin-right:4px;"><i class="bi bi-list" style="font-size:18px;"></i></button>
+        <span style="color:var(--txt3);font-size:13px;">StudyMate</span>
+        <span class="topbar-sep">›</span><span class="page-title">활동 기록</span>
+      </div>
+      <div class="topbar-right">
+        <div style="display:flex;gap:5px;">
+          <button class="filter-chip active" id="stab-mine" data-action="setSessionTab" data-val="mine">내 세션</button>
+          <button class="filter-chip" id="stab-team" data-action="setSessionTab" data-val="team">팀 세션</button>
+          <button class="filter-chip" id="stab-files" data-action="setSessionTab" data-val="files">자료 있는 것만</button>
+        </div>
+        <button class="btn-icon" data-action="loadSessions"><i class="bi bi-arrow-clockwise"></i></button>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="sec-head">
+        <div><h2>활동 기록</h2><p>예약별 세션에 자료와 메모를 기록합니다</p></div>
+      </div>
+      <div id="session-list" style="display:flex;flex-direction:column;gap:10px;max-width:800px;margin:0 auto;"></div>
+      <div id="session-more" style="text-align:center;padding:16px;display:none;">
+        <button class="btn btn-ghost" data-action="loadMoreSessions"><i class="bi bi-chevron-down"></i> 더 보기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PAGE: LIBRARY ═══ -->
+  <div class="page" id="page-library">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn btn-icon" data-action="openMobileSidebar" aria-label="메뉴" style="display:none;margin-right:4px;"><i class="bi bi-list" style="font-size:18px;"></i></button>
+        <span style="color:var(--txt3);font-size:13px;">StudyMate</span>
+        <span class="topbar-sep">›</span><span class="page-title">팀 자료함</span>
+      </div>
+      <div class="topbar-right">
+        <div class="search-wrap"><i class="bi bi-search"></i>
+          <input class="search-input" id="lib-search" placeholder="자료 검색..." oninput="debounceLib()">
+        </div>
+        <div class="select-wrap" style="width:auto;">
+          <select id="lib-type-filter" class="f-control" style="width:120px;padding:7px 28px 7px 10px;font-size:12px;" data-action="selectChange" data-fn="loadLibrary">
+            <option value="">전체 형식</option>
+            <option value="pdf">PDF</option>
+            <option value="pptx">PPT</option>
+            <option value="docx">Word</option>
+            <option value="xlsx">Excel</option>
+            <option value="png">이미지</option>
+          </select>
+        </div>
+        <button class="btn-icon" data-action="loadLibrary"><i class="bi bi-arrow-clockwise"></i></button>
+      </div>
+    </div>
+    <div class="page-body">
+      <div style="max-width:1100px;margin:0 auto;">
+        <div class="sec-head">
+          <div><h2>팀 자료함</h2><p>팀과 공유된 자료를 한 곳에서 확인합니다</p></div>
+          <div style="display:flex;gap:5px;">
+            <button class="filter-chip active" id="lscope-all" data-action="setLibScope" data-val="all">전체</button>
+            <button class="filter-chip" id="lscope-team" data-action="setLibScope" data-val="team">팀 공유</button>
+            <button class="filter-chip" id="lscope-public" data-action="setLibScope" data-val="public">전체 공개</button>
+            <button class="filter-chip" id="lscope-mine" data-action="setLibScope" data-val="mine">내 자료</button>
+          </div>
+        </div>
+        <div id="lib-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;"></div>
+        <div id="lib-more" style="text-align:center;padding:20px;display:none;">
+          <button class="btn btn-ghost" data-action="loadMoreLib"><i class="bi bi-chevron-down"></i> 더 보기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PAGE: SEARCH ═══ -->
+  <div class="page" id="page-search">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn btn-icon" data-action="openMobileSidebar" aria-label="메뉴" style="display:none;margin-right:4px;"><i class="bi bi-list" style="font-size:18px;"></i></button>
+        <span style="color:var(--txt3);font-size:13px;">StudyMate</span>
+        <span class="topbar-sep">›</span><span class="page-title">통합 검색</span>
+      </div>
+    </div>
+    <div class="page-body">
+      <!-- 검색 입력 -->
+      <div class="card" style="padding:20px 24px;margin-bottom:16px;">
+        <div style="display:flex;gap:10px;margin-bottom:14px;">
+          <div style="flex:1;position:relative;">
+            <i class="bi bi-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--txt3);font-size:16px;pointer-events:none;"></i>
+            <input type="text" id="srch-q" class="f-control" placeholder="자료 제목, 예약 목적, 메모 내용 검색..." style="padding-left:42px;font-size:15px;" data-action="srchKeydown">
+          </div>
+          <button class="btn btn-primary" style="padding:10px 22px;" data-action="doSearch">
+            <i class="bi bi-search"></i> 검색
+          </button>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+          <div>
+            <div class="f-label" style="margin-bottom:6px;">날짜 범위</div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <div class="date-input-wrap"><input type="text" id="srch-from" class="f-control" placeholder="시작일" readonly style="width:130px;cursor:pointer;"><i class="bi bi-calendar3 cal-icon"></i></div>
+              <span style="color:var(--txt3);font-size:12px;">~</span>
+              <div class="date-input-wrap"><input type="text" id="srch-to" class="f-control" placeholder="종료일" readonly style="width:130px;cursor:pointer;"><i class="bi bi-calendar3 cal-icon"></i></div>
+            </div>
+          </div>
+          <div>
+            <div class="f-label" style="margin-bottom:6px;">룸</div>
+            <div class="select-wrap">
+              <select id="srch-room" class="f-control" style="width:110px;padding:9px 26px 9px 10px;font-size:13px;">
+                <option value="">전체</option>
+                <option>Room A</option><option>Room B</option><option>Room C</option><option>Room D</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <div class="f-label" style="margin-bottom:6px;">파일 형식</div>
+            <div class="select-wrap">
+              <select id="srch-type" class="f-control" style="width:110px;padding:9px 26px 9px 10px;font-size:13px;">
+                <option value="">전체</option>
+                <option value="pdf">PDF</option>
+                <option value="pptx">PPT</option>
+                <option value="docx">Word</option>
+                <option value="xlsx">Excel</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-ghost" style="font-size:12px;padding:9px 12px;" data-action="clearSearch">
+            <i class="bi bi-x-circle"></i> 초기화
+          </button>
+        </div>
+      </div>
+      <div id="srch-results" style="max-width:900px;margin:0 auto;">
+        <div style="text-align:center;padding:48px;color:var(--txt3);">
+          <i class="bi bi-search" style="font-size:36px;display:block;margin-bottom:12px;opacity:.18;"></i>
+          <p style="font-size:14px;">키워드 또는 날짜를 입력하고 검색하세요</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /main -->
+
+  <!-- ═══ SESSION DETAIL MODAL ═══ -->
+  <div class="modal-overlay" id="session-modal" style="display:none;" data-action="closeSessionOutside" role="dialog" aria-modal="true" aria-label="세션 상세">
+    <div style="background:var(--bg-card);border:1px solid var(--border-hover);border-radius:var(--r-2xl);width:680px;max-width:100%;max-height:90vh;display:flex;flex-direction:column;box-shadow:var(--shadow-xl);animation:popIn .24s var(--ease-spring);">
+      <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+        <div>
+          <div style="font-size:16px;font-weight:700;" id="sm-title">세션 상세</div>
+          <div style="font-size:12px;color:var(--txt3);margin-top:3px;" id="sm-sub">—</div>
+        </div>
+        <button class="btn-icon" data-action="closeSessionModal"><i class="bi bi-x"></i></button>
+      </div>
+      <div style="overflow-y:auto;flex:1;padding:20px 22px 24px;display:flex;flex-direction:column;gap:18px;">
+        <!-- 세션 일지 (rich log) -->
+        <div>
+          <div style="font-size:11.5px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;">
+            <span>📋 세션 일지</span>
+            <button class="btn btn-ghost" style="font-size:11px;padding:3px 8px;" data-action="saveNote"><i class="bi bi-check2"></i> 저장</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--txt3);display:block;margin-bottom:4px;">👥 참석자</label>
+              <input type="text" id="sm-attendees" class="f-control" placeholder="예: 김지훈, 이수연, 박민준" style="font-size:13px;" maxlength="500">
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--txt3);display:block;margin-bottom:4px;">✏️ 메모 / 안건</label>
+              <textarea id="sm-note" class="f-control" rows="3" placeholder="이 세션에 대한 메모, 논의 내용 등을 입력하세요..." maxlength="2000" style="resize:vertical;min-height:70px;line-height:1.6;font-size:13px;"></textarea>
+              <div style="text-align:right;font-size:11px;color:var(--txt3);margin-top:2px;" id="sm-note-char">0 / 2000</div>
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--txt3);display:block;margin-bottom:4px;">✅ 결정사항</label>
+              <textarea id="sm-decisions" class="f-control" rows="2" placeholder="이번 세션에서 결정된 사항을 기록하세요..." maxlength="1000" style="resize:vertical;min-height:52px;line-height:1.6;font-size:13px;"></textarea>
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--txt3);display:block;margin-bottom:4px;">📌 액션 아이템</label>
+              <textarea id="sm-action-items" class="f-control" rows="2" placeholder="담당자 · 기한 포함해서 기록하세요. 예: [김지훈] 디자인 시안 검토 (~금요일)" maxlength="1000" style="resize:vertical;min-height:52px;line-height:1.6;font-size:13px;"></textarea>
+            </div>
+          </div>
+        </div>
+        <!-- 할 일 목록 (Tasks) -->
+        <div>
+          <div style="font-size:11.5px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">✅ 할 일 목록</div>
+          <div id="sm-task-list" style="margin-bottom:10px;display:flex;flex-direction:column;gap:6px;"></div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="text" id="sm-task-title" class="f-control" placeholder="할 일 제목" maxlength="200" style="flex:1;min-width:160px;font-size:13px;" data-action="taskKeydown">
+            <input type="text" id="sm-task-assignee" class="f-control" placeholder="담당자 (선택)" maxlength="100" style="width:110px;font-size:13px;">
+            <input type="date" id="sm-task-due" class="f-control" style="width:130px;font-size:13px;">
+            <button class="btn btn-primary" style="font-size:12px;padding:6px 14px;white-space:nowrap;" data-action="addTask"><i class="bi bi-plus-lg"></i> 추가</button>
+          </div>
+        </div>
+        <!-- 파일 첨부 -->
+        <div>
+          <div style="font-size:11.5px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">📎 첨부 자료</div>
+          <!-- 업로드 드롭존 -->
+          <div id="sm-dropzone" data-action="triggerFileInput" data-dropzone="true">
+            <i class="bi bi-cloud-upload"></i>
+            <div style="font-size:13.5px;font-weight:700;color:var(--txt);">드래그하거나 클릭하여 파일 업로드</div>
+            <div style="font-size:11.5px;color:var(--txt4);margin-top:6px;">PDF, PPT, DOC, XLS, 이미지, ZIP · 최대 50MB</div>
+          </div>
+          <input type="file" id="sm-file-input" style="display:none;" accept=".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.zip,.jpg,.jpeg,.png,.gif,.txt,.md,.hwp">
+          <!-- 업로드 옵션 -->
+          <div id="sm-upload-area" style="display:none;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <div id="sm-img-preview-wrap" style="display:none;flex-shrink:0;width:56px;height:56px;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--border);background:var(--bg);"><img id="sm-img-preview" src="" alt="미리보기" style="width:100%;height:100%;object-fit:cover;"></div>
+              <div style="font-size:12px;font-weight:700;color:var(--txt2);" id="sm-upload-filename">파일명</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+              <div style="flex:1;min-width:160px;" class="f-group" style="margin:0;">
+                <label class="f-label">제목</label>
+                <input type="text" id="sm-upload-title" class="f-control" placeholder="자료 제목 (미입력 시 파일명)" maxlength="100">
+              </div>
+              <div class="f-group" style="margin:0;">
+                <label class="f-label">공개 범위</label>
+                <div class="select-wrap"><select id="sm-upload-scope" class="f-control" style="width:110px;padding:9px 26px 9px 10px;font-size:12px;">
+                  <option value="team">🏢 팀 공유</option>
+                  <option value="public">🌐 전체 공개</option>
+                  <option value="private">🔒 나만 보기</option>
+                </select></div>
+              </div>
+              <button class="btn btn-primary" style="font-size:12px;padding:9px 14px;" id="sm-do-upload" data-action="doUpload">
+                <i class="bi bi-upload"></i> 업로드
+              </button>
+            </div>
+            <input type="text" id="sm-upload-desc" class="f-control" placeholder="설명 (선택, 200자)" maxlength="200" style="margin-top:8px;">
+            <input type="text" id="sm-upload-tags" class="f-control" placeholder="태그 입력 후 엔터 (최대 5개)" style="margin-top:6px;" data-action="tagKeydown">
+            <div id="sm-tags-preview" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;"></div>
+          </div>
+          <!-- 파일 목록 -->
+          <div id="sm-files-list"></div>
+        </div>
+        <!-- 외부 링크 -->
+        <div>
+          <div style="font-size:11.5px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">🔗 외부 링크</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end;">
+            <div style="flex:1;min-width:200px;" class="f-group" style="margin:0;">
+              <label class="f-label">링크 제목</label>
+              <input type="text" id="sm-link-title" class="f-control" placeholder="Notion 회의록, Figma 디자인..." maxlength="100">
+            </div>
+            <div style="flex:2;min-width:200px;" class="f-group" style="margin:0;">
+              <label class="f-label">URL</label>
+              <input type="url" id="sm-link-url" class="f-control" placeholder="https://...">
+            </div>
+            <div class="select-wrap f-group" style="margin:0;">
+              <label class="f-label">유형</label>
+              <select id="sm-link-type" class="f-control" style="width:100px;padding:9px 26px 9px 10px;font-size:12px;">
+                <option value="general">기타</option>
+                <option value="notion">Notion</option>
+                <option value="gdocs">Google</option>
+                <option value="figma">Figma</option>
+                <option value="github">GitHub</option>
+                <option value="youtube">YouTube</option>
+              </select>
+            </div>
+            <div class="select-wrap f-group" style="margin:0;">
+              <label class="f-label">범위</label>
+              <select id="sm-link-scope" class="f-control" style="width:110px;padding:9px 26px 9px 10px;font-size:12px;">
+                <option value="team">🏢 팀 공유</option>
+                <option value="public">🌐 전체 공개</option>
+                <option value="private">🔒 나만</option>
+              </select>
+            </div>
+            <button class="btn btn-ghost" style="font-size:12px;padding:9px 12px;" data-action="addLink">
+              <i class="bi bi-plus-circle"></i> 추가
+            </button>
+          </div>
+          <div id="sm-links-list" style="margin-top:8px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- NOTIFICATION DRAWER -->
+  <div class="notif-drawer" id="notif-drawer">
+    <div style="padding:14px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--bg-surface);">
+      <div style="display:flex;align-items:center;gap:9px;">
+        <i class="bi bi-bell-fill" style="font-size:14px;color:var(--blue);"></i>
+        <span style="font-size:14px;font-weight:700;">알림</span>
+        <span id="notif-unread-badge" style="display:none;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;background:var(--red);color:#fff;"></span>
+      </div>
+      <div style="display:flex;gap:5px;">
+        <button class="btn-ghost" style="font-size:11.5px;padding:5px 10px;" data-action="markAllRead">모두 읽음</button>
+        <button class="btn-icon" data-action="closeNotifDrawer"><i class="bi bi-x"></i></button>
+      </div>
+    </div>
+    <div id="notif-list" style="flex:1;overflow-y:auto;padding:10px 14px 14px;"></div>
+  </div>
+  <div style="display:none;position:fixed;inset:0;z-index:599;background:rgba(0,0,0,.35);backdrop-filter:blur(2px);" id="notif-overlay" data-action="closeNotifDrawer"></div>
+
+  <!-- DAY POPUP -->
+  <div class="overlay" id="popup" style="display:none;" data-action="closePopupOutside" role="dialog" aria-modal="true" aria-label="날짜별 예약 현황">
+    <div class="popup-box">
+      <div class="pop-head">
+        <div><div class="pop-day" id="pop-day">—</div><div style="font-size:12.5px;color:var(--txt2);margin-top:4px;font-weight:500;" id="pop-sub">—</div></div>
+        <button class="btn-icon" data-action="hidePopup"><i class="bi bi-x"></i></button>
+      </div>
+      <div class="pop-tabs">
+        <button class="pop-tab active" id="ptab-team" data-action="setPopTab" data-val="team">🏢 내 팀</button>
+        <button class="pop-tab" id="ptab-all" data-action="setPopTab" data-val="all">🌐 전체</button>
+      </div>
+      <div class="pop-body" id="pop-body"></div>
+      <div class="pop-foot">
+        <button class="btn-submit" style="margin:0;" data-action="quickReserve">
+          <i class="bi bi-calendar-plus"></i> 이 날짜로 예약하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE MODAL -->
+  <div class="overlay" id="profile-modal" style="display:none;" data-action="closeProfileOutside" role="dialog" aria-modal="true" aria-label="프로필 설정">
+    <div style="background:var(--bg-card);border:1px solid var(--border-hover);border-radius:var(--r-2xl);width:420px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-xl);animation:popIn .24s var(--ease-spring);">
+      <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg-card);z-index:1;">
+        <div style="font-size:15px;font-weight:700;">프로필 설정</div>
+        <button class="btn-icon" data-action="closeProfile"><i class="bi bi-x"></i></button>
+      </div>
+      <!-- 기본 정보 -->
+      <div class="profile-section">
+        <div class="profile-section-title">기본 정보</div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+          <div id="prof-av" style="width:52px;height:52px;border-radius:var(--r-lg);background:linear-gradient(135deg,#3b82f6,#22c55e);display:grid;place-items:center;font-size:22px;font-weight:800;color:#fff;flex-shrink:0;">U</div>
+          <div>
+            <div style="font-size:14px;font-weight:700;" id="prof-username">—</div>
+            <div style="font-size:12px;color:var(--txt3);margin-top:2px;" id="prof-role">일반 사용자</div>
+          </div>
+        </div>
+        <div class="f-group">
+          <label class="f-label">표시 이름</label>
+          <input type="text" id="prof-display-name" class="f-control" placeholder="화면에 표시될 이름">
+        </div>
+        <div class="f-group">
+          <label class="f-label">소속 팀</label>
+          <input type="text" id="prof-team" class="f-control" placeholder="예: 개발팀, 디자인팀">
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;">
+            <button class="team-chip" data-action="pickTeamProf" data-val="개발팀">개발팀</button>
+            <button class="team-chip" data-action="pickTeamProf" data-val="디자인팀">디자인팀</button>
+            <button class="team-chip" data-action="pickTeamProf" data-val="마케팅팀">마케팅팀</button>
+            <button class="team-chip" data-action="pickTeamProf" data-val="기획팀">기획팀</button>
+            <button class="team-chip" data-action="pickTeamProf" data-val="인사팀">인사팀</button>
+          </div>
+        </div>
+        <button class="btn-submit" style="margin-top:4px;" data-action="saveProfile">
+          <i class="bi bi-check2"></i> 저장
+        </button>
+      </div>
+      <!-- 비밀번호 변경 -->
+      <div class="profile-section">
+        <div class="profile-section-title">비밀번호 변경</div>
+        <div class="f-group">
+          <label class="f-label">현재 비밀번호</label>
+          <input type="password" id="prof-cur-pw" class="f-control" placeholder="현재 비밀번호">
+        </div>
+        <div class="f-group">
+          <label class="f-label">새 비밀번호</label>
+          <input type="password" id="prof-new-pw" class="f-control" placeholder="6자 이상">
+        </div>
+        <div class="f-group">
+          <label class="f-label">새 비밀번호 확인</label>
+          <input type="password" id="prof-new-pw2" class="f-control" placeholder="다시 입력">
+        </div>
+        <button class="btn-submit" style="margin-top:4px;" data-action="changePw">
+          <i class="bi bi-shield-lock"></i> 비밀번호 변경
+        </button>
+      </div>
+      <!-- 통계 -->
+      <div class="profile-section" style="border-bottom:none;">
+        <div class="profile-section-title">내 활동</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;" id="prof-stats">
+          <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--r);padding:12px;text-align:center;">
+            <div style="font-size:20px;font-weight:900;" id="prof-total-res">—</div>
+            <div style="font-size:11px;color:var(--txt3);margin-top:2px;">총 예약</div>
+          </div>
+          <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--r);padding:12px;text-align:center;">
+            <div style="font-size:20px;font-weight:900;color:var(--green);" id="prof-upcoming">—</div>
+            <div style="font-size:11px;color:var(--txt3);margin-top:2px;">예정</div>
+          </div>
+          <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--r);padding:12px;text-align:center;">
+            <div style="font-size:20px;font-weight:900;color:var(--blue);" id="prof-fav-count">—</div>
+            <div style="font-size:11px;color:var(--txt3);margin-top:2px;">즐겨찾기</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/user-state.js"></script>
+  <script src="../js/user-render.js"></script>
+  <script src="../js/user-actions.js"></script>
+</body>
+</html>
