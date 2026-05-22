@@ -8,10 +8,12 @@ router.get('/mine',         verify, ctrl.myReservations);
 router.get('/team',         verify, ctrl.teamReservations);
 router.get('/calendar',     verify, ctrl.calendarAll);
 router.get('/public-stats', verify, ctrl.publicStats);
+router.get('/room-status',  verify, ctrl.roomStatus);
+router.get('/export.csv',   verify, ctrl.exportCsv);         // ← CSV 엑스포트
 router.get('/all',          verify, requireAdmin, ctrl.all);
 router.get('/stats',        verify, requireAdmin, ctrl.stats);
 router.post('/',            verify, ctrl.create);
 router.patch('/:id/cancel', verify, ctrl.cancel);
+router.patch('/:id',        verify, ctrl.update);
 
 module.exports = router;
-router.get('/room-status',  verify, ctrl.roomStatus);

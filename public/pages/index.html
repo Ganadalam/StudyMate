@@ -9,7 +9,15 @@
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-<div class="auth-page">
+<a href="#main-content" class="sr-only sr-only-focusable" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">본문으로 건너뛰기</a>
+<div class="auth-page" id="main-content">
+  <!-- Floating Theme Toggle -->
+  <div style="position: absolute; top: 24px; right: 24px; z-index: 100;">
+    <button class="theme-switch-btn" onclick="theme.toggle()" aria-label="테마 전환" title="테마 전환">
+      <i class="bi bi-moon-stars-fill" id="theme-icon"></i>
+    </button>
+  </div>
+
   <div class="auth-container">
     <div class="auth-logo">
       <div class="auth-logo-icon">📚</div>
@@ -19,8 +27,8 @@
     <div class="auth-card">
       <!-- 탭 -->
       <div class="auth-tabs">
-        <button class="auth-tab active" id="tab-login"    onclick="switchTab('login')">로그인</button>
-        <button class="auth-tab"        id="tab-register" onclick="switchTab('register')">회원가입</button>
+        <button class="auth-tab active" id="tab-login"    onclick="switchTab('login')" role="tab" aria-selected="true" aria-controls="form-login">로그인</button>
+        <button class="auth-tab"        id="tab-register" onclick="switchTab('register')" role="tab" aria-selected="false" aria-controls="form-register">회원가입</button>
       </div>
 
       <!-- LOGIN -->
@@ -46,17 +54,6 @@
           <i class="bi bi-arrow-right-circle-fill"></i> 로그인
         </button>
 
-        <div class="auth-hint">
-          <div class="auth-hint-title">테스트 계정</div>
-          <div class="auth-hint-row">
-            <span class="role-badge admin">Admin</span>
-            <span class="cred">admin / admin123</span>
-          </div>
-          <div class="auth-hint-row">
-            <span class="role-badge user">User</span>
-            <span class="cred">user1 / user123</span>
-          </div>
-        </div>
       </div>
 
       <!-- REGISTER -->
@@ -162,7 +159,7 @@ function checkPw() {
   if (/[^a-zA-Z0-9]/.test(v)) score++;
   const cols = ['','#ef4444','#f59e0b','#3b82f6','#22c55e'];
   const lbls = ['','취약','보통','강함','매우 강함'];
-  for (let i=1;i<=4;i++) document.getElementById('ps'+i).style.background = i<=score ? cols[score] : 'var(--surface3)';
+  for (let i=1;i<=4;i++) document.getElementById('ps'+i).style.background = i<=score ? cols[score] : 'var(--border)';
   const el = document.getElementById('pw-hint');
   el.textContent = v ? '보안 강도: ' + lbls[score] : '';
   el.className = 'field-hint';

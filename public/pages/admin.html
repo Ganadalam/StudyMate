@@ -7,64 +7,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <style>
-    .flatpickr-calendar { background:var(--surface)!important; border:1px solid var(--border2)!important; border-radius:var(--r-lg)!important; box-shadow:var(--shadow-xl)!important; font-family:var(--font)!important; }
-    .flatpickr-day { color:var(--txt2)!important; border-radius:var(--r-sm)!important; }
-    .flatpickr-day:hover,.flatpickr-day:focus { background:var(--surface2)!important; border-color:transparent!important; }
-    .flatpickr-day.selected { background:var(--brand)!important; border-color:var(--brand)!important; color:#fff!important; }
-    .flatpickr-day.today:not(.selected) { border-color:var(--brand)!important; color:var(--brand)!important; font-weight:700!important; }
-    .flatpickr-day.flatpickr-disabled { color:var(--txt3)!important; opacity:.35!important; }
-    .flatpickr-months,.flatpickr-weekdays { background:var(--surface)!important; }
-    .flatpickr-current-month,.flatpickr-monthDropdown-months { color:var(--txt)!important; font-size:13px!important; }
-    .flatpickr-weekday { color:var(--txt3)!important; font-size:11px!important; font-weight:700!important; }
-    .flatpickr-prev-month,.flatpickr-next-month { color:var(--txt3)!important; fill:var(--txt3)!important; }
-    .flatpickr-prev-month:hover,.flatpickr-next-month:hover { color:var(--txt)!important; fill:var(--txt)!important; }
-    .dayContainer { border-right:none!important; }
-    .flatpickr-innerContainer { border-bottom:none!important; }
-  </style>
-  <style>
-    .cong-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)}
-    .cong-row:last-child{border-bottom:none}
-    .cong-time{font-family:var(--mono);font-size:11.5px;color:var(--txt3);width:44px;flex-shrink:0}
-    .cong-bw{flex:1;height:6px;background:var(--surface2);border-radius:99px;overflow:hidden}
-    .cong-bf{height:100%;border-radius:99px;transition:width .8s var(--ease-out)}
-    .cong-lbl{font-size:11px;font-weight:700;width:80px;text-align:right;font-family:var(--mono)}
-    .room-stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 18px 14px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s;cursor:default}
-    .room-stat-card:hover{border-color:var(--border2);transform:translateY(-2px)}
-    .room-stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--rc)}
-    .room-stat-val{font-size:26px;font-weight:900;letter-spacing:-1px;color:var(--txt);margin-bottom:2px}
-    .room-stat-lbl{font-size:12px;color:var(--txt2);font-weight:500}
-    .room-stat-bar{margin-top:10px;height:4px;background:var(--surface2);border-radius:99px;overflow:hidden}
-    .room-stat-fill{height:100%;border-radius:99px;transition:width .8s var(--ease-out)}
-    .notif-type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-    /* User table */
-    .user-row-actions{display:flex;gap:5px;align-items:center}
-    /* Room edit card */
-    .room-edit-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;transition:border-color .2s}
-    .room-edit-card:hover{border-color:var(--border2)}
-    .room-active-toggle{display:flex;align-items:center;gap:8px}
-    .toggle-sw{position:relative;width:36px;height:20px;cursor:pointer}
-    .toggle-sw input{opacity:0;width:0;height:0;position:absolute}
-    .toggle-track{position:absolute;inset:0;border-radius:99px;background:var(--surface3);transition:background .2s;border:1px solid var(--border)}
-    .toggle-sw input:checked ~ .toggle-track{background:var(--green);border-color:var(--green)}
-    .toggle-thumb{position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
-    .toggle-sw input:checked ~ .toggle-track ~ .toggle-thumb, .toggle-sw input:checked + .toggle-track + .toggle-thumb{transform:translateX(16px)}
-    /* inline toggle thumb positioning */
-    .toggle-sw input:checked ~ *:last-child{transform:translateX(16px)}
-    @keyframes popIn{from{opacity:0;transform:scale(.92) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
-    .date-input-wrap { position:relative; display:inline-flex; align-items:center; }
-    .date-input-wrap .f-control { padding-right:32px!important; }
-    .date-input-wrap .cal-icon { position:absolute; right:10px; color:var(--txt3); font-size:13px; pointer-events:none; }
-    .modal-overlay{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s ease}
-    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-    .modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-2xl);width:480px;max-width:100%;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-xl);animation:popIn .22s var(--ease-spring)}
-    .modal-head{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1}
-    /* Heatmap */
-    .heatmap-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;padding:16px 20px 20px}
-    .hm-cell{aspect-ratio:1;border-radius:var(--r-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:default;transition:transform .15s;gap:2px}
-    .hm-cell:hover{transform:scale(1.1)}
-    .hm-time{font-size:8.5px;opacity:.7;font-family:var(--mono)}
-  </style>
+  <!-- 컴포넌트 스타일은 css/style.css에 통합됨 -->
 </head>
 <body>
 <div class="app">
@@ -73,7 +16,7 @@
     <div class="sb-brand">
       <div class="sb-brand-icon">📚</div>
       <span class="sb-brand-name">StudyMate</span>
-      <button class="sb-toggle" onclick="toggleSb()"><i class="bi bi-layout-sidebar-reverse"></i></button>
+      <button class="sb-toggle" onclick="toggleSb()" aria-label="사이드바 접기/펼치기"><i class="bi bi-layout-sidebar-reverse"></i></button>
     </div>
     <nav class="sb-nav">
       <div class="sb-section">대시보드</div>
@@ -114,6 +57,9 @@
           <div class="sb-role">관리자</div>
         </div>
       </div>
+      <button class="sb-item" onclick="theme.toggle()" title="테마 전환" data-tip="테마 전환" style="margin-bottom:6px;border:1px solid var(--border);">
+        <i class="bi bi-moon-stars-fill theme-icon-el" style="font-size:16px;"></i><span class="sb-label">테마 전환</span>
+      </button>
       <button class="sb-logout" onclick="auth.logout()">
         <i class="bi bi-box-arrow-left"></i><span class="sb-label">로그아웃</span>
       </button>
@@ -135,39 +81,37 @@
       </div>
       <div class="page-body">
         <div class="kpi-grid stagger" style="margin-bottom:14px;">
-          <div class="kpi-card" style="--kpi-line:var(--brand-g);--kpi-bg:rgba(59,130,246,.1);">
+          <div class="kpi-card" style="--kpi-line:var(--blue);--kpi-bg:rgba(49,130,246,.1);">
             <div class="kpi-icon-wrap">📋</div><div class="kpi-value" id="kpi-total">—</div>
-            <div class="kpi-label">총 예약 건수</div><div class="spark-row" id="spark-total"></div>
+            <div class="kpi-label">총 예약 건수</div>
           </div>
           <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#22c55e,#4ade80);--kpi-bg:rgba(34,197,94,.1);">
             <div class="kpi-icon-wrap" style="background:rgba(34,197,94,.1);">👥</div><div class="kpi-value" id="kpi-headcount">—</div>
-            <div class="kpi-label">총 이용 인원</div><div class="spark-row" id="spark-head"></div>
+            <div class="kpi-label">총 이용 인원</div>
           </div>
           <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#f59e0b,#fcd34d);--kpi-bg:rgba(245,158,11,.1);">
             <div class="kpi-icon-wrap" style="background:rgba(245,158,11,.1);">📊</div><div class="kpi-value" id="kpi-avg">—</div>
-            <div class="kpi-label">평균 이용 인원</div><div class="spark-row" id="spark-avg"></div>
+            <div class="kpi-label">평균 이용 인원</div>
           </div>
           <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#ef4444,#fca5a5);--kpi-bg:rgba(239,68,68,.1);">
-            <div class="kpi-icon-wrap" style="background:rgba(239,68,68,.1);">🔥</div><div class="kpi-value" id="kpi-peak" style="font-size:20px;">—</div>
-            <div class="kpi-label">피크 시간대</div><div class="spark-row" id="spark-peak"></div>
+            <div class="kpi-icon-wrap">🔥</div><div class="kpi-value" id="kpi-peak">—</div>
+            <div class="kpi-label">피크 시간대</div>
           </div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;" class="stagger">
-          <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:10px;">
-            <div style="width:34px;height:34px;border-radius:var(--r);background:rgba(239,68,68,.1);display:grid;place-items:center;font-size:16px;flex-shrink:0;">🚫</div>
-            <div><div style="font-size:20px;font-weight:900;color:var(--red);" id="kpi-cancelled">—</div><div style="font-size:11.5px;color:var(--txt2);">취소 건수</div></div>
+          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#ef4444,#fca5a5);--kpi-bg:rgba(239,68,68,.08);">
+            <div class="kpi-icon-wrap">🚫</div><div class="kpi-value" id="kpi-cancelled">—</div>
+            <div class="kpi-label">취소 건수</div>
           </div>
-          <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:10px;">
-            <div style="width:34px;height:34px;border-radius:var(--r);background:rgba(34,197,94,.1);display:grid;place-items:center;font-size:16px;flex-shrink:0;">📅</div>
-            <div><div style="font-size:20px;font-weight:900;color:var(--green);" id="kpi-today">—</div><div style="font-size:11.5px;color:var(--txt2);">오늘 예약</div></div>
+          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#22c55e,#4ade80);--kpi-bg:rgba(34,197,94,.08);">
+            <div class="kpi-icon-wrap" style="background:rgba(34,197,94,.1);">📅</div><div class="kpi-value" id="kpi-today" style="color:var(--green);">—</div>
+            <div class="kpi-label">오늘 예약</div>
           </div>
-          <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:10px;">
-            <div style="width:34px;height:34px;border-radius:var(--r);background:rgba(99,102,241,.1);display:grid;place-items:center;font-size:16px;flex-shrink:0;">🏆</div>
-            <div><div style="font-size:15px;font-weight:800;color:var(--indigo);" id="kpi-top-room">—</div><div style="font-size:11.5px;color:var(--txt2);">인기 룸</div></div>
+          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#6366f1,#818cf8);--kpi-bg:rgba(49,130,246,.08);">
+            <div class="kpi-icon-wrap">🏆</div><div class="kpi-value" id="kpi-top-room">—</div>
+            <div class="kpi-label">인기 룸</div>
           </div>
-          <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:10px;">
-            <div style="width:34px;height:34px;border-radius:var(--r);background:rgba(56,189,248,.1);display:grid;place-items:center;font-size:16px;flex-shrink:0;">👤</div>
-            <div><div style="font-size:20px;font-weight:900;color:#38bdf8;" id="kpi-users">—</div><div style="font-size:11.5px;color:var(--txt2);">총 사용자</div></div>
+          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#38bdf8,#7dd3fc);--kpi-bg:rgba(56,189,248,.08);">
+            <div class="kpi-icon-wrap" style="background:rgba(56,189,248,.1);">👤</div><div class="kpi-value" id="kpi-users" style="color:#38bdf8;">—</div>
+            <div class="kpi-label">총 사용자</div>
           </div>
         </div>
         <div class="chart-row c84">
@@ -250,12 +194,10 @@
           <div class="card"><div class="card-head"><div><div class="card-title">7일 트렌드</div></div></div>
             <div style="padding:12px 20px 20px;"><div style="position:relative;height:230px;"><canvas id="c-trend2"></canvas></div></div></div>
         </div>
-        <div class="card" style="margin-bottom:14px;">
-          <div class="card-head"><div><div class="card-title">혼잡도 히트맵</div><div class="card-sub">시간대별 색상 시각화</div></div></div>
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">혼잡도 히트맵</div><div class="card-sub">시간대별 색상 시각화 — 숫자는 총 이용 인원</div></div></div>
           <div class="heatmap-grid" id="heatmap"></div>
         </div>
-        <div class="card"><div class="card-head" style="padding-bottom:14px;"><div><div class="card-title">시간대별 혼잡도</div></div></div>
-          <div style="padding:0 20px 20px;" id="cong-list"></div></div>
       </div>
     </div>
 
@@ -285,7 +227,7 @@
       <div class="page-body">
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;" class="stagger">
           <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:10px;">
-            <div style="width:34px;height:34px;border-radius:var(--r);background:rgba(59,130,246,.1);display:grid;place-items:center;font-size:16px;flex-shrink:0;">👤</div>
+            <div style="width:34px;height:34px;border-radius:var(--r);background:rgba(49,130,246,.1);display:grid;place-items:center;font-size:16px;flex-shrink:0;">👤</div>
             <div><div style="font-size:20px;font-weight:900;" id="us-total">—</div><div style="font-size:11.5px;color:var(--txt2);">전체 사용자</div></div>
           </div>
           <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:10px;">
@@ -294,7 +236,7 @@
           </div>
           <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:10px;">
             <div style="width:34px;height:34px;border-radius:var(--r);background:rgba(245,158,11,.1);display:grid;place-items:center;font-size:16px;flex-shrink:0;">🏢</div>
-            <div><div style="font-size:20px;font-weight:900;color:var(--amber);" id="us-teams">—</div><div style="font-size:11.5px;color:var(--txt2);">팀 수</div></div>
+            <div><div style="font-size:20px;font-weight:900;color:var(--orange);" id="us-teams">—</div><div style="font-size:11.5px;color:var(--txt2);">팀 수</div></div>
           </div>
         </div>
         <div class="card"><div class="tbl-wrap" style="max-height:560px;overflow-y:auto;">
@@ -322,18 +264,12 @@
         <div class="topbar-right"><button class="btn btn-primary" onclick="openNotifModal()"><i class="bi bi-send-fill"></i> 새 알림 발송</button></div>
       </div>
       <div class="page-body">
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;" class="stagger">
-          <div class="kpi-card" style="--kpi-line:var(--brand-g);--kpi-bg:rgba(59,130,246,.1);padding:14px 16px;">
-            <div class="kpi-value" id="ns-total" style="font-size:22px;">—</div><div class="kpi-label">총 발송</div>
-          </div>
-          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,var(--blue),#60a5fa);--kpi-bg:rgba(59,130,246,.1);padding:14px 16px;">
-            <div class="kpi-value" id="ns-info" style="font-size:22px;color:var(--blue);">—</div><div class="kpi-label">💬 일반</div>
-          </div>
-          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#f59e0b,#fcd34d);--kpi-bg:rgba(245,158,11,.1);padding:14px 16px;">
-            <div class="kpi-value" id="ns-warn" style="font-size:22px;color:var(--amber);">—</div><div class="kpi-label">⚠️ 주의</div>
-          </div>
-          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#ef4444,#fca5a5);--kpi-bg:rgba(239,68,68,.1);padding:14px 16px;">
-            <div class="kpi-value" id="ns-urgent" style="font-size:22px;color:var(--red);">—</div><div class="kpi-label">🚨 긴급</div>
+        <div class="card" style="margin-bottom:14px;padding:14px 20px;">
+          <div class="notif-summary">
+            <div class="notif-summary-chip"><span>📨 총 발송</span><span class="ns-val" id="ns-total">—</span></div>
+            <div class="notif-summary-chip" style="color:var(--blue);"><span>💬 일반</span><span class="ns-val" id="ns-info">—</span></div>
+            <div class="notif-summary-chip" style="color:var(--orange);"><span>⚠️ 주의</span><span class="ns-val" id="ns-warn">—</span></div>
+            <div class="notif-summary-chip" style="color:var(--red);"><span>🚨 긴급</span><span class="ns-val" id="ns-urgent">—</span></div>
           </div>
         </div>
         <div class="card"><div class="card-head" style="padding-bottom:14px;">
@@ -352,25 +288,25 @@
       <div class="page-body">
         <div class="sec-head"><div><h2>스토리지 현황</h2><p>파일 업로드·다운로드 통계를 확인합니다</p></div></div>
         <!-- 스토리지 메트릭 -->
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;" class="stagger">
-          <div class="kpi-card" style="--kpi-line:var(--brand-g);--kpi-bg:rgba(59,130,246,.1);padding:16px;">
+        <div class="kpi-grid stagger" style="margin-bottom:16px;">
+          <div class="kpi-card" style="--kpi-line:var(--blue);--kpi-bg:rgba(49,130,246,.1);">
             <div class="kpi-icon-wrap">📁</div>
-            <div class="kpi-value" id="st-total-files" style="font-size:24px;">—</div>
+            <div class="kpi-value" id="st-total-files">—</div>
             <div class="kpi-label">총 파일 수</div>
           </div>
-          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#22c55e,#4ade80);--kpi-bg:rgba(34,197,94,.1);padding:16px;">
-            <div class="kpi-icon-wrap" style="background:rgba(34,197,94,.1);">💾</div>
-            <div class="kpi-value" id="st-total-size" style="font-size:20px;">—</div>
+          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#22c55e,#4ade80);--kpi-bg:rgba(34,197,94,.1);">
+            <div class="kpi-icon-wrap">💾</div>
+            <div class="kpi-value" id="st-total-size">—</div>
             <div class="kpi-label">총 사용 용량</div>
           </div>
-          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#f59e0b,#fcd34d);--kpi-bg:rgba(245,158,11,.1);padding:16px;">
-            <div class="kpi-icon-wrap" style="background:rgba(245,158,11,.1);">📊</div>
-            <div class="kpi-value" id="st-quota-pct" style="font-size:24px;">—</div>
+          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#f59e0b,#fcd34d);--kpi-bg:rgba(245,158,11,.1);">
+            <div class="kpi-icon-wrap">📊</div>
+            <div class="kpi-value" id="st-quota-pct">—</div>
             <div class="kpi-label">할당량 사용률</div>
           </div>
-          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#ef4444,#fca5a5);--kpi-bg:rgba(239,68,68,.1);padding:16px;">
-            <div class="kpi-icon-wrap" style="background:rgba(239,68,68,.1);">🔥</div>
-            <div class="kpi-value" id="st-top-dl" style="font-size:13px;font-weight:700;letter-spacing:-.2px;">—</div>
+          <div class="kpi-card" style="--kpi-line:linear-gradient(90deg,#ef4444,#fca5a5);--kpi-bg:rgba(239,68,68,.1);">
+            <div class="kpi-icon-wrap">🔥</div>
+            <div class="kpi-value" id="st-top-dl">—</div>
             <div class="kpi-label">최다 다운로드</div>
           </div>
         </div>
@@ -380,8 +316,8 @@
             <span style="font-size:12.5px;font-weight:600;">스토리지 사용량</span>
             <span id="st-quota-label" style="font-size:12px;color:var(--txt3);">— / 10 GB</span>
           </div>
-          <div style="height:8px;background:var(--surface2);border-radius:99px;overflow:hidden;">
-            <div id="st-quota-bar" style="height:100%;border-radius:99px;background:var(--brand-g);width:0;transition:width 1s var(--ease-out);"></div>
+          <div style="height:8px;background:var(--bg-surface);border-radius:99px;overflow:hidden;">
+            <div id="st-quota-bar" style="height:100%;border-radius:99px;background:var(--blue);width:0;transition:width 1s var(--ease-enter);"></div>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
@@ -420,7 +356,7 @@
       <button class="btn-icon" onclick="closeUserModal()"><i class="bi bi-x"></i></button>
     </div>
     <div style="padding:20px 22px;display:flex;flex-direction:column;gap:14px;">
-      <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--r);">
         <div id="um-av" style="width:44px;height:44px;border-radius:var(--r);background:linear-gradient(135deg,#3b82f6,#22c55e);display:grid;place-items:center;font-size:18px;font-weight:800;color:#fff;flex-shrink:0;">U</div>
         <div><div id="um-username" style="font-size:14px;font-weight:700;"></div><div id="um-joined" style="font-size:11.5px;color:var(--txt3);margin-top:2px;"></div></div>
       </div>
@@ -494,16 +430,50 @@
 <script>
 if (!auth.guard('admin')) throw 0;
 
+/* ── THEME-ADAPTIVE CHART UTILS ──────────────────────── */
+function getThemeColors() {
+  const isDark = theme.get() === 'dark';
+  return {
+    txt: isDark ? '#94a3b8' : '#475569',
+    borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
+    gridColor: isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.04)'
+  };
+}
+
+// Hook into the global theme switcher to dynamically update charts on theme changes
+if (window.theme) {
+  const origUpdateUI = theme.updateUI.bind(theme);
+  theme.updateUI = function(t) {
+    origUpdateUI(t);
+    const colors = getThemeColors();
+    Chart.defaults.color = colors.txt;
+    Chart.defaults.borderColor = colors.borderColor;
+    
+    if (stats) {
+      renderHourChart();
+      renderDonut();
+      renderTrend();
+      
+      const activePage = document.querySelector('.page.active');
+      if (activePage) {
+        if (activePage.id === 'page-analytics') renderAnalytics();
+        if (activePage.id === 'page-rooms-stats') renderRoomsStats();
+      }
+    }
+  };
+}
+
 /* ── CHART DEFAULTS ──────────────────────────────────── */
-Chart.defaults.color       = '#475569';
-Chart.defaults.font.family = 'Pretendard, system-ui, sans-serif';
+const colorsDefault = getThemeColors();
+Chart.defaults.color       = colorsDefault.txt;
+Chart.defaults.font.family = "'Plus Jakarta Sans', 'Pretendard', sans-serif";
 Chart.defaults.font.size   = 11;
-Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
+Chart.defaults.borderColor = colorsDefault.borderColor;
 
 const MONTHS       = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
 const ROOM_COL_CSS = {'Room A':'#818cf8','Room B':'#38bdf8','Room C':'#fb923c','Room D':'#f472b6'};
 const NOTIF_ICONS  = {info:'💬',warning:'⚠️',success:'✅',urgent:'🚨'};
-const NOTIF_COLS   = {info:'var(--blue)',warning:'var(--amber)',success:'var(--green)',urgent:'var(--red)'};
+const NOTIF_COLS   = {info:'var(--blue)',warning:'var(--orange)',success:'var(--green)',urgent:'var(--red)'};
 const NOTIF_LABELS = {info:'일반',warning:'주의',success:'공지',urgent:'긴급'};
 const TYPE_BTN     = {info:'type-btn',warning:'type-btn',success:'type-btn',urgent:'type-btn'};
 
@@ -613,21 +583,6 @@ function renderKPIs(){
   set('kpi-today',     todayCount.toLocaleString());
   set('kpi-top-room',  stats.byRoom&&stats.byRoom[0]?stats.byRoom[0].room_name:'—');
   set('badge-total',   confirmed);
-  const sorted=[...(stats.byDate||[])].reverse();
-  const counts=sorted.map(d=>d.count), totals=sorted.map(d=>d.total);
-  const maxC=Math.max(...counts,1), maxT=Math.max(...totals,1);
-  renderSpark('spark-total',counts,maxC,'#3b82f6');
-  renderSpark('spark-head', totals,maxT,'#22c55e');
-  renderSpark('spark-avg',  counts.map((c,i)=>totals[i]/(c||1)),Math.max(...counts.map((c,i)=>totals[i]/(c||1)),1),'#f59e0b');
-  renderSpark('spark-peak', counts,maxC,'#ef4444');
-}
-
-function renderSpark(id, vals, max, color){
-  const el=document.getElementById(id); if(!el) return;
-  el.innerHTML=vals.map(v=>{
-    const h=Math.max(5,(v/max)*26), isPeak=v===Math.max(...vals);
-    return `<div class="spark-bar ${isPeak?'peak':''}" style="height:${h}px;background:${color};opacity:${isPeak?.9:.25};"></div>`;
-  }).join('');
 }
 
 function mkChart(id, config){
@@ -639,29 +594,141 @@ function mkChart(id, config){
 function renderHourChart(){
   if(!stats||!stats.byHour||!stats.byHour.length) return;
   const d=stats.byHour, maxV=Math.max(...d.map(x=>x.total_headcount),1);
-  mkChart('c-hour',{type:'bar',data:{labels:d.map(x=>x.start_time),datasets:[{data:d.map(x=>x.total_headcount),backgroundColor:d.map(x=>x.total_headcount===maxV?'rgba(59,130,246,.9)':'rgba(59,130,246,.25)'),borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#475569'}},x:{grid:{display:false},ticks:{color:'#475569'}}}}});
+  const el = document.getElementById('c-hour'); if(!el) return;
+  const ctx = el.getContext('2d');
+  
+  const colors = getThemeColors();
+  const isDark = theme.get() === 'dark';
+  
+  const gradientActive = ctx.createLinearGradient(0, 0, 0, 200);
+  gradientActive.addColorStop(0, '#3b82f6');
+  gradientActive.addColorStop(1, isDark ? '#1d4ed8' : '#2563eb');
+  
+  const gradientNormal = ctx.createLinearGradient(0, 0, 0, 200);
+  gradientNormal.addColorStop(0, isDark ? 'rgba(59, 130, 246, 0.3)' : 'rgba(59, 130, 246, 0.15)');
+  gradientNormal.addColorStop(1, 'rgba(59, 130, 246, 0.02)');
+
+  mkChart('c-hour',{
+    type:'bar',
+    data:{
+      labels:d.map(x=>x.start_time),
+      datasets:[{
+        data:d.map(x=>x.total_headcount),
+        backgroundColor:d.map(x=>x.total_headcount===maxV?gradientActive:gradientNormal),
+        borderRadius:5,
+        borderSkipped:false
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        y:{
+          beginAtZero:true,
+          grid:{color:colors.gridColor},
+          ticks:{color:colors.txt}
+        },
+        x:{
+          grid:{display:false},
+          ticks:{color:colors.txt}
+        }
+      }
+    }
+  });
 }
 function renderDonut(){
   if(!stats||!stats.byRoom||!stats.byRoom.length) return;
   const d=stats.byRoom;
-  mkChart('c-donut',{type:'doughnut',data:{labels:d.map(x=>x.room_name),datasets:[{data:d.map(x=>x.count),backgroundColor:Object.values(ROOM_COL_CSS),borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{padding:10,usePointStyle:true,pointStyle:'circle',color:'#64748b',font:{size:10}}}}}});
+  const colors = getThemeColors();
+  mkChart('c-donut',{
+    type:'doughnut',
+    data:{
+      labels:d.map(x=>x.room_name),
+      datasets:[{
+        data:d.map(x=>x.count),
+        backgroundColor:Object.values(ROOM_COL_CSS),
+        borderWidth:theme.get() === 'dark' ? 2 : 1,
+        borderColor:theme.get() === 'dark' ? 'var(--bg-card)' : '#ffffff',
+        hoverOffset:8
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      cutout:'70%',
+      plugins:{
+        legend:{
+          position:'bottom',
+          labels:{
+            padding:10,
+            usePointStyle:true,
+            pointStyle:'circle',
+            color:colors.txt,
+            font:{size:10}
+          }
+        }
+      }
+    }
+  });
 }
 function renderTrend(){
   if(!stats||!stats.byDate) return;
+  if(!stats.byDate||!stats.byDate.length) return;
   const sorted=[...stats.byDate].reverse();
-  mkChart('c-trend',{type:'line',data:{labels:sorted.map(d=>d.date.slice(5)),datasets:[{data:sorted.map(d=>d.count),borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,.07)',borderWidth:2,pointRadius:2,pointBackgroundColor:'#22c55e',tension:.4,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#475569'}},x:{grid:{display:false},ticks:{color:'#475569'}}}}});
+  const el = document.getElementById('c-trend'); if(!el) return;
+  const ctx = el.getContext('2d');
+  
+  const grad = ctx.createLinearGradient(0, 0, 0, 130);
+  const isDark = theme.get() === 'dark';
+  if (isDark) {
+    grad.addColorStop(0, 'rgba(34, 197, 94, 0.35)');
+    grad.addColorStop(1, 'rgba(34, 197, 94, 0.0)');
+  } else {
+    grad.addColorStop(0, 'rgba(34, 197, 94, 0.22)');
+    grad.addColorStop(1, 'rgba(34, 197, 94, 0.0)');
+  }
+  
+  const colors = getThemeColors();
+  
+  mkChart('c-trend',{
+    type:'line',
+    data:{
+      labels:sorted.map(d=>d.date.slice(5)),
+      datasets:[{
+        data:sorted.map(d=>d.count),
+        borderColor:'#22c55e',
+        backgroundColor:grad,
+        borderWidth:2,
+        pointRadius:2,
+        pointBackgroundColor:'#22c55e',
+        tension:.4,
+        fill:true
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        y:{
+          beginAtZero:true,
+          grid:{color:colors.gridColor},
+          ticks:{color:colors.txt}
+        },
+        x:{
+          grid:{display:false},
+          ticks:{color:colors.txt}
+        }
+      }
+    }
+  });
 }
 function renderTeamStats(){
   if(!stats||!stats.byTeam) return;
   const d=stats.byTeam; const max=Math.max(...d.map(x=>x.count),1);
   document.getElementById('team-stat-list').innerHTML = d.length
-    ? d.map(t=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 20px;border-bottom:1px solid var(--border);">
-        <span style="font-size:12px;font-weight:600;color:var(--txt);width:80px;flex-shrink:0;">${t.team}</span>
-        <div style="flex:1;height:5px;background:var(--surface2);border-radius:99px;overflow:hidden;">
-          <div style="height:100%;width:${Math.round((t.count/max)*100)}%;background:var(--brand-g);border-radius:99px;"></div>
-        </div>
-        <span class="mono" style="font-size:11px;color:var(--txt3);width:30px;text-align:right;">${t.count}</span>
-      </div>`).join('')
+    ? d.map(t=>`<div class="team-stat-row"><span class="team-stat-name">${t.team}</span><div class="team-stat-bar-wrap"><div class="team-stat-bar-fill" style="width:${Math.round((t.count/max)*100)}%;"></div></div><span class="team-stat-cnt">${t.count}</span></div>`).join('')
     : '<div style="padding:16px 20px;color:var(--txt3);font-size:13px;">데이터 없음</div>';
 }
 function renderRecentTable(){
@@ -672,7 +739,7 @@ function renderRecentTable(){
       <td class="mono">#${r.id}</td>
       <td><div class="user-pill"><div class="user-dot" style="background:${col}20;color:${col};">${(r.username||'U')[0].toUpperCase()}</div>${r.username||'—'}</div></td>
       <td><span class="room-tag" style="border-color:${col}30;color:${col};"><i class="bi bi-door-open"></i>${r.room_name}</span></td>
-      <td>${r.date}</td><td style="font-family:var(--mono);font-size:12px;">${r.start_time}~${r.end_time}</td>
+      <td>${r.date}</td><td style="font-family:var(--font-mono);font-size:12px;">${r.start_time}~${r.end_time}</td>
       <td>${crowdBadge(r.headcount)}</td>
       <td style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--txt2);">${r.purpose||'—'}</td>
       <td>${statusBadge(r.status)}</td></tr>`;
@@ -695,7 +762,7 @@ function renderResTable(data){
       <td><span class="badge badge-gray" style="font-size:10.5px;">${r.team||'—'}</span></td>
       <td><span class="room-tag" style="border-color:${col}30;color:${col};"><i class="bi bi-door-open"></i>${r.room_name}</span></td>
       <td style="font-weight:500;">${r.date}</td>
-      <td style="font-family:var(--mono);font-size:12px;">${r.start_time}~${r.end_time}</td>
+      <td style="font-family:var(--font-mono);font-size:12px;">${r.start_time}~${r.end_time}</td>
       <td>${crowdBadge(r.headcount)}</td>
       <td style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--txt2);">${r.purpose||'—'}</td>
       <td>${statusBadge(r.status)}</td>
@@ -743,9 +810,17 @@ function onFromChange() {
   filterRes();
 }
 function clearFilters() {
+  // 날짜 초기화
   const today = getTodayKST();
   if(window._adminFpFrom){ window._adminFpFrom.setDate(today,true); window._adminFpTo.setDate(getMonthEnd(today),true); }
   else { document.getElementById('filter-from').value=today; document.getElementById('filter-to').value=getMonthEnd(today); }
+  // 상태·룸 필터 칩 초기화
+  activeFilters.status='all'; activeFilters.room='all';
+  document.querySelectorAll('#page-reservations .filter-chip').forEach(c=>{
+    c.classList.toggle('active', c.textContent.trim()==='전체');
+  });
+  // 검색어 초기화
+  document.getElementById('res-search').value='';
   filterRes();
 }
 
@@ -771,41 +846,110 @@ function renderAnalytics(){
   const quiet = stats.byHour.reduce((a,b)=>a.total_headcount<b.total_headcount?a:b,{start_time:'—',total_headcount:9999});
   const busyRoom=stats.byRoom[0]||{room_name:'—',count:0};
   document.getElementById('insight-cards').innerHTML=`
-    <div class="insight-card fade-in"><div class="insight-icon" style="background:rgba(239,68,68,.12);">🔥</div><div><div class="card-sub" style="margin-bottom:3px;">최대 혼잡</div><div class="insight-val" style="color:var(--red);">${peak.start_time}</div><div class="insight-sub">${peak.total_headcount}명 이용</div></div></div>
-    <div class="insight-card fade-in" style="animation-delay:.06s"><div class="insight-icon" style="background:rgba(59,130,246,.12);">🌙</div><div><div class="card-sub" style="margin-bottom:3px;">최소 혼잡</div><div class="insight-val" style="color:var(--blue);">${quiet.start_time}</div><div class="insight-sub">${quiet.total_headcount}명 이용</div></div></div>
-    <div class="insight-card fade-in" style="animation-delay:.12s"><div class="insight-icon" style="background:rgba(99,102,241,.12);">🏆</div><div><div class="card-sub" style="margin-bottom:3px;">인기 룸</div><div class="insight-val" style="color:var(--indigo);">${busyRoom.room_name}</div><div class="insight-sub">${busyRoom.count}건 예약</div></div></div>`;
+    <div class="insight-card fade-in"><div class="insight-icon" style="background:rgba(239,68,68,.12);box-shadow:0 0 10px rgba(239,68,68,0.15);">🔥</div><div><div class="card-sub" style="margin-bottom:3px;">최대 혼잡</div><div class="insight-val" style="color:var(--red);">${peak.start_time}</div><div class="insight-sub">${peak.total_headcount}명 이용</div></div></div>
+    <div class="insight-card fade-in" style="animation-delay:.06s"><div class="insight-icon" style="background:rgba(49,130,246,.12);box-shadow:0 0 10px rgba(49,130,246,0.15);">🌙</div><div><div class="card-sub" style="margin-bottom:3px;">최소 혼잡</div><div class="insight-val" style="color:var(--blue);">${quiet.start_time}</div><div class="insight-sub">${quiet.total_headcount}명 이용</div></div></div>
+    <div class="insight-card fade-in" style="animation-delay:.12s"><div class="insight-icon" style="background:rgba(49,130,246,.08);box-shadow:0 0 10px rgba(99,102,241,0.15);">🏆</div><div><div class="card-sub" style="margin-bottom:3px;">인기 룸</div><div class="insight-val" style="color:var(--blue);">${busyRoom.room_name}</div><div class="insight-sub">${busyRoom.count}건 예약</div></div></div>`;
   const d=stats.byHour;
-  mkChart('c-hour2',{type:'bar',data:{labels:d.map(x=>x.start_time),datasets:[{label:'이용 인원',data:d.map(x=>x.total_headcount),backgroundColor:'rgba(59,130,246,.7)',borderRadius:5,yAxisID:'y'},{label:'예약 건수',data:d.map(x=>x.count),backgroundColor:'rgba(34,197,94,.5)',borderRadius:5,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#64748b',usePointStyle:true,pointStyle:'circle'}}},scales:{y:{beginAtZero:true,position:'left',grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#475569'}},y1:{beginAtZero:true,position:'right',grid:{drawOnChartArea:false},ticks:{color:'#475569'}},x:{grid:{display:false},ticks:{color:'#475569'}}}}});
+  
+  const elHour2 = document.getElementById('c-hour2'); if(!elHour2) return;
+  
+  const colors = getThemeColors();
+  const isDark = theme.get() === 'dark';
+  
+  // destroy 먼저 → 새 context에서 gradient 생성 (기존 context 무효화 방지)
+  if(charts['c-hour2']){ charts['c-hour2'].destroy(); delete charts['c-hour2']; }
+  const ctxHour2 = elHour2.getContext('2d');
+  
+  const gradBlue = ctxHour2.createLinearGradient(0, 0, 0, 230);
+  gradBlue.addColorStop(0, 'rgba(59, 130, 246, 0.85)');
+  gradBlue.addColorStop(1, 'rgba(59, 130, 246, 0.1)');
+  
+  const gradGreen = ctxHour2.createLinearGradient(0, 0, 0, 230);
+  gradGreen.addColorStop(0, 'rgba(34, 197, 94, 0.7)');
+  gradGreen.addColorStop(1, 'rgba(34, 197, 94, 0.1)');
+
+  charts['c-hour2'] = new Chart(ctxHour2, {
+    type:'bar',
+    data:{
+      labels:d.map(x=>x.start_time),
+      datasets:[
+        {label:'이용 인원',data:d.map(x=>x.total_headcount),backgroundColor:gradBlue,borderRadius:5,yAxisID:'y'},
+        {label:'예약 건수',data:d.map(x=>x.count),backgroundColor:gradGreen,borderRadius:5,yAxisID:'y1'}
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:colors.txt,usePointStyle:true,pointStyle:'circle'}}},
+      scales:{
+        y:{
+          beginAtZero:true,
+          position:'left',
+          grid:{color:colors.gridColor},
+          ticks:{color:colors.txt}
+        },
+        y1:{
+          beginAtZero:true,
+          position:'right',
+          grid:{drawOnChartArea:false},
+          ticks:{color:colors.txt}
+        },
+        x:{
+          grid:{display:false},
+          ticks:{color:colors.txt}
+        }
+      }
+    }
+  });
+  
   const sorted=[...stats.byDate].reverse();
-  mkChart('c-trend2',{type:'line',data:{labels:sorted.map(d=>d.date.slice(5)),datasets:[{label:'예약 건수',data:sorted.map(d=>d.count),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.07)',fill:true,tension:.4,borderWidth:2,pointRadius:2,pointBackgroundColor:'#3b82f6'},{label:'이용 인원',data:sorted.map(d=>d.total),borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,.06)',fill:true,tension:.4,borderWidth:2,pointRadius:2,pointBackgroundColor:'#22c55e'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#64748b',usePointStyle:true,pointStyle:'circle'}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#475569'}},x:{grid:{display:false},ticks:{color:'#475569'}}}}});
+  const elTrend2 = document.getElementById('c-trend2'); if(!elTrend2) return;
+  
+  // destroy 먼저 → 새 context에서 gradient 생성
+  if(charts['c-trend2']){ charts['c-trend2'].destroy(); delete charts['c-trend2']; }
+  const ctxTrend2 = elTrend2.getContext('2d');
+  
+  const gradBlueTrend = ctxTrend2.createLinearGradient(0, 0, 0, 230);
+  gradBlueTrend.addColorStop(0, 'rgba(59, 130, 246, 0.35)');
+  gradBlueTrend.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+  
+  const gradGreenTrend = ctxTrend2.createLinearGradient(0, 0, 0, 230);
+  gradGreenTrend.addColorStop(0, 'rgba(34, 197, 94, 0.25)');
+  gradGreenTrend.addColorStop(1, 'rgba(34, 197, 94, 0.0)');
+
+  charts['c-trend2'] = new Chart(ctxTrend2, {
+    type:'line',
+    data:{
+      labels:sorted.map(d=>d.date.slice(5)),
+      datasets:[
+        {label:'예약 건수',data:sorted.map(d=>d.count),borderColor:'#3b82f6',backgroundColor:gradBlueTrend,fill:true,tension:.4,borderWidth:2,pointRadius:3,pointBackgroundColor:'#3b82f6'},
+        {label:'이용 인원',data:sorted.map(d=>d.total),borderColor:'#22c55e',backgroundColor:gradGreenTrend,fill:true,tension:.4,borderWidth:2,pointRadius:3,pointBackgroundColor:'#22c55e'}
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:colors.txt,usePointStyle:true,pointStyle:'circle'}}},
+      scales:{
+        y:{
+          beginAtZero:true,
+          grid:{color:colors.gridColor},
+          ticks:{color:colors.txt}
+        },
+        x:{
+          grid:{display:false},
+          ticks:{color:colors.txt}
+        }
+      }
+    }
+  });
+  
   const max=Math.max(...d.map(x=>x.total_headcount),1);
   document.getElementById('heatmap').innerHTML=d.map(h=>{
     const p=h.total_headcount/max;
     const r2=p>=.75?239:p>=.5?245:p>=.25?59:34, g2=p>=.75?68:p>=.5?158:p>=.25?130:197, b2=p>=.75?68:p>=.5?11:p>=.25?246:94;
-    return `<div class="hm-cell" style="background:rgba(${r2},${g2},${b2},${.08+p*.7});color:rgb(${r2},${g2},${b2});"><span style="font-size:11px;font-weight:900;">${h.total_headcount}</span><span class="hm-time">${h.start_time.slice(0,5)}</span></div>`;
-  }).join('');
-  /* 혼잡도 이중 표기: 전체 누적(회색) + 평균(컬러) */
-  const maxAvg = Math.max(...d.map(h=>h.avg_per_day||0), 1);
-  document.getElementById('cong-list').innerHTML=d.map(h=>{
-    const pct    = Math.round((h.total_headcount/max)*100);
-    const avgPct = Math.min(100, Math.round(((h.avg_per_day||0)/maxAvg)*100));
-    const col    = pct>=75?'var(--red)':pct>=45?'var(--amber)':'var(--green)';
-    const lbl    = pct>=75?'혼잡':pct>=45?'보통':'여유';
-    const avgHC  = h.avg_headcount || 0;
-    return `<div class="cong-row">
-      <span class="cong-time">${h.start_time}</span>
-      <div style="flex:1;display:flex;flex-direction:column;gap:3px;">
-        <div style="position:relative;height:7px;background:var(--surface2);border-radius:99px;overflow:hidden;">
-          <div style="position:absolute;left:0;top:0;height:100%;width:${pct}%;background:${col};opacity:.25;border-radius:99px;"></div>
-          <div style="position:absolute;left:0;top:1px;height:5px;width:${avgPct}%;background:${col};border-radius:99px;transition:width .8s var(--ease-out);"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--txt3);">
-          <span>총 ${h.total_headcount}명 · ${h.count}건</span>
-          <span>평균 ${avgHC}명/회</span>
-        </div>
-      </div>
-      <span class="cong-lbl" style="color:${col};min-width:60px;text-align:right;">${lbl}</span>
-    </div>`;
+    const pct=Math.round(p*100), lbl=pct>=75?'혼잡':pct>=45?'보통':'여유';
+    return `<div class="hm-cell" title="${h.start_time} · ${h.total_headcount}명 · ${lbl}" style="background:rgba(${r2},${g2},${b2},${.08+p*.7});color:rgb(${r2},${g2},${b2});"><span style="font-size:11px;font-weight:900;">${h.total_headcount}</span><span class="hm-time">${h.start_time.slice(0,5)}</span></div>`;
   }).join('');
 }
 
@@ -815,7 +959,7 @@ function renderRoomsStats(){
   const d=stats.byRoom, maxC=Math.max(...d.map(x=>x.count),1), total=d.reduce((s,x)=>s+x.count,0);
   document.getElementById('room-stat-cards').innerHTML=d.map(r=>{
     const col=ROOM_COL_CSS[r.room_name]||'#3b82f6', pct=Math.round((r.count/maxC)*100);
-    return `<div class="room-stat-card" style="--rc:${col};">
+    return `<div class="room-stat-card" style="--rc:${col}; box-shadow: 0 4px 10px ${col}15;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
         <div style="font-size:13px;font-weight:800;color:${col};">${r.room_name}</div>
         <span class="badge" style="background:${col}20;color:${col};font-size:10px;">${total?Math.round((r.count/total)*100):0}%</span>
@@ -825,9 +969,39 @@ function renderRoomsStats(){
       <div class="room-stat-bar"><div class="room-stat-fill" style="width:${pct}%;background:${col};"></div></div>
     </div>`;
   }).join('');
-  mkChart('c-room-bar',{type:'bar',data:{labels:d.map(x=>x.room_name),datasets:[{label:'예약 건수',data:d.map(x=>x.count),backgroundColor:Object.values(ROOM_COL_CSS).map(c=>c+'bb'),borderRadius:7,borderSkipped:false},{label:'총 인원',data:d.map(x=>x.total),backgroundColor:Object.values(ROOM_COL_CSS).map(c=>c+'44'),borderRadius:7,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#64748b',usePointStyle:true,pointStyle:'circle'}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#475569'}},x:{grid:{display:false},ticks:{color:'#475569'}}}}});
+  
+  const colors = getThemeColors();
+  const isDark = theme.get() === 'dark';
+  
+  mkChart('c-room-bar',{
+    type:'bar',
+    data:{
+      labels:d.map(x=>x.room_name),
+      datasets:[
+        {label:'예약 건수',data:d.map(x=>x.count),backgroundColor:d.map(x=>(ROOM_COL_CSS[x.room_name]||'#3b82f6')+(isDark?'dd':'bb')),borderRadius:7,borderSkipped:false},
+        {label:'총 인원',data:d.map(x=>x.total),backgroundColor:d.map(x=>(ROOM_COL_CSS[x.room_name]||'#3b82f6')+'30'),borderRadius:7,borderSkipped:false}
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:colors.txt,usePointStyle:true,pointStyle:'circle'}}},
+      scales:{
+        y:{
+          beginAtZero:true,
+          grid:{color:colors.gridColor},
+          ticks:{color:colors.txt}
+        },
+        x:{
+          grid:{display:false},
+          ticks:{color:colors.txt}
+        }
+      }
+    }
+  });
+  
   document.getElementById('room-util').innerHTML=d.map((r,i)=>{
-    const col=Object.values(ROOM_COL_CSS)[i%4], pct=Math.round((r.count/maxC)*100);
+    const col=ROOM_COL_CSS[r.room_name]||Object.values(ROOM_COL_CSS)[i%4], pct=Math.round((r.count/maxC)*100);
     return `<div class="util-row"><span class="util-room-name" style="color:${col};">${r.room_name}</span><div class="util-bar-wrap"><div class="util-bar-fill" style="width:${pct}%;background:${col};"></div></div><span class="util-pct" style="color:${col};">${pct}%</span><span class="util-cnt">${r.count}건</span></div>`;
   }).join('');
 }
@@ -864,7 +1038,7 @@ function renderUsersTable(data){
     const rc=resCount(u.id);
     return `<tr class="fade-in">
       <td class="mono">#${u.id}</td>
-      <td><div class="user-pill"><div class="user-dot" style="background:rgba(59,130,246,.15);color:var(--blue);font-size:11px;">${(u.username||'U')[0].toUpperCase()}</div><span style="font-weight:600;font-size:13px;">${u.username}</span></div></td>
+      <td><div class="user-pill"><div class="user-dot" style="background:rgba(49,130,246,.15);color:var(--blue);font-size:11px;">${(u.username||'U')[0].toUpperCase()}</div><span style="font-weight:600;font-size:13px;">${u.username}</span></div></td>
       <td style="font-size:13px;">${u.display_name||'—'}</td>
       <td><span class="badge badge-gray" style="font-size:10.5px;">${u.team||'—'}</span></td>
       <td>${u.role==='admin'?'<span class="badge badge-amber">관리자</span>':'<span class="badge badge-blue">일반</span>'}</td>
@@ -980,11 +1154,13 @@ function renderRoomEditCards(){
       </div>
     </div>`;
   }).join('');
-  // color input sync
+  // color input sync (cloneNode로 기존 리스너 제거 후 재등록)
   document.querySelectorAll('.room-edit-card').forEach(card=>{
     const ci=card.querySelector('.ri-color'), ct=card.querySelector('.ri-colortext');
-    ci.addEventListener('input',()=>ct.value=ci.value);
-    ct.addEventListener('input',()=>{ if(/^#[0-9a-fA-F]{6}$/.test(ct.value)) ci.value=ct.value; });
+    const ciNew=ci.cloneNode(true); ci.replaceWith(ciNew);
+    const ctNew=ct.cloneNode(true); ct.replaceWith(ctNew);
+    ciNew.addEventListener('input',()=>ctNew.value=ciNew.value);
+    ctNew.addEventListener('input',()=>{ if(/^#[0-9a-fA-F]{6}$/.test(ctNew.value)) ciNew.value=ctNew.value; });
   });
 }
 async function toggleRoomActive(id,active){
@@ -1099,42 +1275,29 @@ async function loadStorage(){
     set('st-quota-label', `${fmtSize(d.total_size)} / ${fmtSize(d.quota)}`);
     set('st-top-dl', d.topDL[0]?`${d.topDL[0].title} (${d.topDL[0].download_count}회)`:'—');
     const bar = document.getElementById('st-quota-bar');
-    if(bar){ bar.style.width=pct+'%'; bar.style.background=pct>=90?'var(--red)':pct>=70?'var(--amber)':'var(--brand-g)'; }
+    if(bar){ bar.style.width=pct+'%'; bar.style.background=pct>=90?'var(--red)':pct>=70?'var(--orange)':'var(--blue)'; }
     // 팀별
     const maxSz = Math.max(...(d.byTeam||[]).map(t=>t.sz),1);
     document.getElementById('st-by-team').innerHTML = d.byTeam.length
-      ? d.byTeam.map(t=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 20px;border-bottom:1px solid var(--border);">
-          <span style="font-size:12px;font-weight:600;width:80px;flex-shrink:0;">${t.team||'—'}</span>
-          <div style="flex:1;height:5px;background:var(--surface2);border-radius:99px;overflow:hidden;">
-            <div style="height:100%;width:${Math.round((t.sz/maxSz)*100)}%;background:var(--brand-g);border-radius:99px;"></div>
-          </div>
-          <span class="mono" style="font-size:11px;color:var(--txt3);width:60px;text-align:right;">${fmtSize(t.sz)}</span>
-        </div>`).join('')
+      ? d.byTeam.map(t=>`<div class="tree-bar-row"><span class="tree-bar-name">${t.team||'소속 없음'}</span><div class="tree-bar-progress"><div class="tree-bar-fill" style="width:${Math.round((t.sz/maxSz)*100)}%;background:linear-gradient(90deg,var(--blue),var(--accent));"></div></div><span class="tree-bar-val">${fmtSize(t.sz)}</span></div>`).join('')
       : '<div style="padding:16px 20px;color:var(--txt3);font-size:13px;">데이터 없음</div>';
     // 형식별
     const FILE_ICONS = {pdf:'📄',pptx:'📊',ppt:'📊',docx:'📝',doc:'📝',xlsx:'📗',xls:'📗',zip:'🗜️',png:'🖼️',jpg:'🖼️',jpeg:'🖼️'};
     const maxCnt = Math.max(...(d.byType||[]).map(t=>t.cnt),1);
     document.getElementById('st-by-type').innerHTML = d.byType.length
-      ? d.byType.map(t=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 20px;border-bottom:1px solid var(--border);">
-          <span style="font-size:16px;width:24px;text-align:center;">${FILE_ICONS[t.file_type]||'📁'}</span>
-          <span style="font-size:12px;font-weight:600;width:50px;flex-shrink:0;text-transform:uppercase;">${t.file_type}</span>
-          <div style="flex:1;height:5px;background:var(--surface2);border-radius:99px;overflow:hidden;">
-            <div style="height:100%;width:${Math.round((t.cnt/maxCnt)*100)}%;background:linear-gradient(90deg,#6366f1,#818cf8);border-radius:99px;"></div>
-          </div>
-          <span class="mono" style="font-size:11px;color:var(--txt3);width:70px;text-align:right;">${t.cnt}개 · ${fmtSize(t.sz)}</span>
-        </div>`).join('')
+      ? d.byType.map(t=>`<div class="tree-bar-row"><span style="font-size:16px;width:22px;text-align:center;flex-shrink:0;">${FILE_ICONS[t.file_type]||'📁'}</span><span class="tree-bar-name" style="text-transform:uppercase;">${t.file_type}</span><div class="tree-bar-progress"><div class="tree-bar-fill" style="width:${Math.round((t.cnt/maxCnt)*100)}%;background:linear-gradient(90deg,var(--purple),var(--accent));"></div></div><span class="tree-bar-val">${t.cnt}개 · ${fmtSize(t.sz)}</span></div>`).join('')
       : '<div style="padding:16px 20px;color:var(--txt3);font-size:13px;">데이터 없음</div>';
     // 유저별
     const maxUSz = Math.max(...(d.byUser||[]).map(u=>u.sz),1);
     document.getElementById('st-by-user').innerHTML = d.byUser.length
       ? d.byUser.map(u=>`<tr class="fade-in">
-          <td><div class="user-pill"><div class="user-dot" style="background:rgba(59,130,246,.15);color:var(--blue);">${(u.username||'U')[0].toUpperCase()}</div>${u.display_name||u.username}</div></td>
-          <td><span class="badge badge-gray">${u.team||'—'}</span></td>
-          <td class="mono">${u.cnt}개</td>
-          <td class="mono">${fmtSize(u.sz)}</td>
-          <td style="width:160px;">
-            <div style="height:5px;background:var(--surface2);border-radius:99px;overflow:hidden;">
-              <div style="height:100%;width:${Math.round((u.sz/maxUSz)*100)}%;background:var(--brand-g);border-radius:99px;"></div>
+          <td><div class="user-pill"><div class="user-dot" style="background:var(--blue-light);color:var(--blue);font-weight:700;">${(u.username||'U')[0].toUpperCase()}</div><span style="font-weight:600;font-size:13px;">${u.display_name||u.username}</span></div></td>
+          <td><span class="badge badge-gray" style="font-size:10.5px;">${u.team||'—'}</span></td>
+          <td class="mono" style="font-size:12px;font-weight:500;">${u.cnt}개</td>
+          <td class="mono" style="font-size:12px;font-weight:600;color:var(--txt);">${fmtSize(u.sz)}</td>
+          <td style="width:160px;vertical-align:middle;">
+            <div style="height:6px;background:var(--bg-surface);border-radius:99px;overflow:hidden;width:120px;">
+              <div style="height:100%;width:${Math.round((u.sz/maxUSz)*100)}%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:99px;"></div>
             </div>
           </td>
         </tr>`).join('')

@@ -65,8 +65,9 @@ exports.stats = (req, res) => {
   res.json({ total, byTeam, active30d: active });
 };
 
-/* CSV 내보내기 (admin) */
+/* CSV 내보내기 (admin) — #12 파일명에 날짜 포함 */
 exports.exportCSV = (req, res) => {
+  const today = new Date().toISOString().split('T')[0];
   const rows = db.prepare(`
     SELECT r.id, u.username, u.display_name, u.team, r.room_name, r.date,
            r.start_time, r.end_time, r.headcount, r.purpose, r.status, r.created_at
@@ -79,7 +80,8 @@ exports.exportCSV = (req, res) => {
     [r.id,r.username,r.display_name,r.team,r.room_name,r.date,r.start_time,r.end_time,r.headcount,r.purpose,r.status,r.created_at]
     .map(esc).join(',')
   ).join('\n');
+  const filename = `users_reservations_${today}.csv`;
   res.setHeader('Content-Type','text/csv; charset=utf-8');
-  res.setHeader('Content-Disposition','attachment; filename="reservations.csv"');
-  res.send('\uFEFF' + csv); // BOM for Excel
+  res.setHeader('Content-Disposition',`attachment; filename*=UTF-8''${encodeURIComponent(filename)}`);
+  res.send('\uFEFF' + csv);
 };
